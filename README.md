@@ -3,26 +3,25 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <img alt="NexPanel" src="./media/3x-ui-light.png">
   </picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MHSanaei/3x-ui/releases"><img src="https://img.shields.io/github/v/release/mhsanaei/3x-ui" alt="Release"></a>
-  <a href="https://github.com/MHSanaei/3x-ui/actions"><img src="https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg" alt="Build"></a>
-  <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg" alt="GO Version"></a>
-  <a href="https://github.com/MHSanaei/3x-ui/releases/latest"><img src="https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg" alt="Downloads"></a>
+  <a href="https://github.com/XjiangSail/NexPanel/releases"><img src="https://img.shields.io/github/v/release/XjiangSail/NexPanel" alt="Release"></a>
+  <a href="https://github.com/XjiangSail/NexPanel/actions"><img src="https://img.shields.io/github/actions/workflow/status/XjiangSail/NexPanel/release.yml.svg" alt="Build"></a>
+  <a href="#"><img src="https://img.shields.io/github/go-mod/go-version/XjiangSail/NexPanel.svg" alt="GO Version"></a>
+  <a href="https://github.com/XjiangSail/NexPanel/releases/latest"><img src="https://img.shields.io/github/downloads/XjiangSail/NexPanel/total.svg" alt="Downloads"></a>
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true" alt="License"></a>
-  <a href="https://pkg.go.dev/github.com/mhsanaei/3x-ui/v3"><img src="https://pkg.go.dev/badge/github.com/mhsanaei/3x-ui/v3.svg" alt="Go Reference"></a>
-  <a href="https://docs.sanaei.dev"><img src="https://img.shields.io/badge/docs-docs.sanaei.dev-22d3ee" alt="Documentation"></a>
 </p>
 
-**3X-UI** is an advanced, open-source web control panel for managing [Xray-core](https://github.com/XTLS/Xray-core) servers. It provides a clean, multi-language interface for deploying, configuring, and monitoring a wide range of proxy and VPN protocols — from a single VPS to multi-node deployments.
+**NexPanel** is a web control panel for managing [Xray-core](https://github.com/XTLS/Xray-core) servers, focused on **node-level access control**: every inbound (node) enforces its own concurrent-IP limit, and every inbound has its own audit view of online IPs, IP history, registered devices, and over-limit rejections.
 
-Built as an enhanced fork of the original X-UI project, 3X-UI adds broader protocol support, improved stability, per-client traffic accounting, and many quality-of-life features.
+It is built on the [3X-UI](https://github.com/MHSanaei/3x-ui) project, which in turn extends the original X-UI panel. NexPanel keeps all of 3X-UI's protocol support, traffic accounting and multi-node management, and replaces the per-client IP limit model with a per-inbound one.
 
 > [!IMPORTANT]
 > This project is intended for personal use only. Please do not use it for illegal purposes or in a production environment.
+
 
 ## Features
 
@@ -32,17 +31,19 @@ Built as an enhanced fork of the original X-UI project, 3X-UI adds broader proto
 - **Native TUIC v5 server** — In-process Go QUIC server with Xray routing and per-client traffic accounting; BBR and New Reno are available server-side. CUBIC is preserved in the client profile but currently falls back to New Reno on the server.
 - **MTProto proxies** — per-client FakeTLS secrets, ad-tags, and quotas, applied live without dropping existing connections.
 - **Fallbacks** — serve multiple protocols on a single port (e.g. VLESS and Trojan on 443) using Xray's fallback support.
-- **Per-client management** — traffic quotas, expiry dates, IP limits with trusted-address exemptions, HWID device limits, scheduled renewal cycles, live online status, and one-click share links, QR codes, and subscriptions.
+- **Per-inbound IP limits** — cap the number of concurrent source IPs on each inbound independently, with a per-inbound over-limit action (`reject_new` blocks the newest address, `kick_oldest` disconnects the oldest) and trusted-address exemptions.
+- **Per-inbound audit view** — for every node: live online IPs, long-term IP history, registered HWID devices, and the most recent over-limit rejections, all in one dialog.
+- **Per-client management** — traffic quotas, expiry dates, scheduled renewal cycles, live online status, and one-click share links, QR codes, and subscriptions.
 - **Traffic statistics** — per inbound, per client, and per outbound, with reset controls.
 - **Multi-node support** — manage and scale across multiple servers from a single panel, including cloning inbounds onto other nodes.
 - **Outbound & routing** — WARP, NordVPN, PIA, custom routing rules, load balancers with balancer-to-balancer fallback, and outbound proxy chaining. Bundled geosite and geoip categories are browsable straight from the rule editor.
 - **Built-in subscription server** — raw, JSON, and Clash output, auto-selected from the client's User-Agent, plus [custom page templates](docs/custom-subscription-templates.md).
 - **Telegram and Discord bots** for remote monitoring and management.
 - **RESTful API** with scoped, optionally expiring tokens and an in-panel API reference.
-- **Installable panel (PWA)** — pin 3X-UI to a desktop or phone home screen.
+- **Installable panel (PWA)** — pin NexPanel to a desktop or phone home screen.
 - **Flexible storage** — SQLite (default) or PostgreSQL.
 - **14 UI languages** with dark and light themes.
-- **Fail2ban integration** for enforcing per-client IP limits.
+- **Fail2ban integration** for enforcing inbound IP limits.
 
 ## Screenshots
 
@@ -74,26 +75,26 @@ Built as an enhanced fork of the original X-UI project, 3X-UI adds broader proto
 ## Quick Start
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/XjiangSail/NexPanel/main/install.sh)
 ```
 
-To install a specific version, append its tag (e.g. `v3.7.0`):
+To install a specific version, append its tag (e.g. `v3.11.1`):
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.7.0
+bash <(curl -Ls https://raw.githubusercontent.com/XjiangSail/NexPanel/main/install.sh) v3.11.1
 ```
 
 To install the rolling **dev** build (latest per-commit pre-release from `main`, not a stable release), pass `dev-latest`:
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
+bash <(curl -Ls https://raw.githubusercontent.com/XjiangSail/NexPanel/main/install.sh) dev-latest
 ```
 
 During installation a random username, password, and access path are generated. After installation, run `x-ui` to open the management menu, where you can start/stop the service, view or reset your login credentials, manage SSL certificates, and more.
 
 Every release asset is published with a `.sha256` sum next to it. Both `install.sh` and the updater verify the archive against that sum and abort on a mismatch.
 
-For full documentation — installation, configuration, operations, and the complete API reference — visit **[docs.sanaei.dev](https://docs.sanaei.dev)**.
+For full documentation — installation, configuration, operations, and the complete API reference — see the [`docs/`](docs/) site sources; the same API reference is also browsable in the panel under **API Docs**.
 
 ### Unattended install
 
@@ -113,7 +114,7 @@ zero prompts, generating random credentials and writing them to
 
 ## Database Options
 
-3X-UI supports two backends, chosen during the install:
+NexPanel supports two backends, chosen during the install:
 
 - **SQLite** (default) — a single file at `/etc/x-ui/x-ui.db`. Zero setup, ideal for small and medium deployments.
 - **PostgreSQL** — recommended for high client counts or multi-node setups. The installer can install PostgreSQL locally for you, or accept a DSN to an existing server.
@@ -143,10 +144,10 @@ The default `docker compose up -d` keeps using SQLite. To run with the bundled P
 docker compose --profile postgres up -d
 ```
 
-The image bundles Fail2ban (enabled by default) to enforce per-client **IP limits**. Fail2ban bans offenders with `iptables`, which requires the `NET_ADMIN` capability. `docker-compose.yml` already grants it via `cap_add`; if you start the container with `docker run` instead, add the capabilities yourself, otherwise bans are logged but never applied:
+The image bundles Fail2ban (enabled by default) to enforce per-inbound **IP limits**. Fail2ban bans offenders with `iptables`, which requires the `NET_ADMIN` capability. `docker-compose.yml` already grants it via `cap_add`; if you start the container with `docker run` instead, add the capabilities yourself, otherwise bans are logged but never applied:
 
 ```bash
-docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/mhsanaei/3x-ui
+docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/xjiangsail/nexpanel
 ```
 
 ## Environment Variables
@@ -173,7 +174,7 @@ docker run -d --cap-add=NET_ADMIN --cap-add=NET_RAW ... ghcr.io/mhsanaei/3x-ui
 | `XUI_NODE_TOKEN_KEY_FILE` | JSON keyring (mode `0600`) holding the active key id and its base64 32-byte keys | `/etc/x-ui/node_token_key.json` |
 | `XUI_NODE_TOKEN_KEY` | A single base64 32-byte key, used only when the key file cannot be loaded | — |
 
-The complete list is on the [environment variables reference](https://docs.sanaei.dev/docs/reference/env-vars).
+The complete list is in the [environment variables reference](docs/content/docs/en/reference/env-vars.mdx).
 
 ## Supported Languages
 
@@ -196,36 +197,14 @@ Contributions are welcome. Please read the [Contributing Guide](/CONTRIBUTING.md
 
 ## Community Tools
 
-Tools and integrations built by the community around 3x-ui.
+Tools and integrations built by the community around 3X-UI (protocol- and API-compatible with NexPanel).
 
 - [terraform-provider-3x-ui](https://github.com/batonogov/terraform-provider-threexui) (License: **MIT**): _Manage inbounds, clients, panel settings, and Xray configuration as code with Terraform / OpenTofu._
 - [3X-UI Manager](https://github.com/yukh975/3X-UI-Manager) (License: **MIT**): _Native Android client for 3x-ui — dashboard, inbounds, clients with QR sharing, nodes and multi-panel management. Available on F-Droid._
 
-## Support project
+## Credits
 
-**If this project is helpful to you, you may wish to give it a**:star2:
+NexPanel is a fork of [MHSanaei/3x-ui](https://github.com/MHSanaei/3x-ui), which itself builds on the original X-UI panel. Upstream and this fork are both licensed under **GPL-3.0**; if you find the underlying project useful, consider supporting the upstream author.
 
-<a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
-</a>
+The upstream project's community, documentation and issue history remain the best reference for everything NexPanel inherits unchanged.
 
-</br>
-<a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
-</a>
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=mhsanaei%2F3x-ui&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mhsanaei/3x-ui&type=date&legend=top-left" />
- </picture>
-</a>
-
-<p align="center">
- <a href="https://www.star-history.com/mhsanaei/3x-ui">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /><img alt="GitHub Trending Repository of the Day" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /></picture>
- </a>
-</p>
