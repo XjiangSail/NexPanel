@@ -62,6 +62,9 @@ export interface RawInboundRow {
   subSortIndex?: number;
   excludeFromSub?: boolean;
   disableFlow?: boolean;
+  limitIp?: number;
+  limitAction?: string;
+  onlineIpCount?: number;
   clientStats?: unknown;
 }
 
@@ -92,6 +95,8 @@ export interface WireInboundPayload {
   subSortIndex: number;
   excludeFromSub: boolean;
   disableFlow: boolean;
+  limitIp: number;
+  limitAction: 'reject_new' | 'kick_oldest';
 }
 
 function coerceJsonObject(value: unknown): Record<string, unknown> {
@@ -237,6 +242,8 @@ export function rawInboundToFormValues(row: RawInboundRow): InboundFormValues {
     subSortIndex: row.subSortIndex == null || row.subSortIndex === 0 ? 1 : row.subSortIndex,
     excludeFromSub: row.excludeFromSub ?? false,
     disableFlow: row.disableFlow ?? false,
+    limitIp: row.limitIp ?? 0,
+    limitAction: row.limitAction === 'kick_oldest' ? 'kick_oldest' : 'reject_new',
     protocol,
     settings,
   } as InboundFormValues;
@@ -403,6 +410,8 @@ export function formValuesToWirePayload(
     subSortIndex: values.subSortIndex,
     excludeFromSub: values.excludeFromSub,
     disableFlow: values.disableFlow,
+    limitIp: values.limitIp,
+    limitAction: values.limitAction,
   };
   if (values.nodeId != null) payload.nodeId = values.nodeId;
   return payload;

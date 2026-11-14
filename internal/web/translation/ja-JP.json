@@ -155,7 +155,7 @@
       "xrayUpdates": "Xrayの更新",
       "xraySwitchClickDesk": "慎重に選択してください。古いバージョンは現在の設定と互換性がない可能性があります。",
       "updatePanel": "パネルを更新",
-      "panelUpdateDesc": "これにより3X-UIが最新リリースに更新され、パネルサービスが再起動されます。",
+      "panelUpdateDesc": "これによりNexPanelが最新リリースに更新され、パネルサービスが再起動されます。",
       "currentPanelVersion": "現在のパネルバージョン",
       "latestPanelVersion": "最新のパネルバージョン",
       "panelUpToDate": "パネルは最新です",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "Xrayのバージョンが#version#に変更されます。",
       "xraySwitchVersionPopover": "Xrayの更新が成功しました",
       "panelUpdateDialog": "本当にパネルを更新しますか？",
-      "panelUpdateDialogDesc": "これにより3X-UIが#version#に更新され、パネルサービスが再起動されます。",
+      "panelUpdateDialogDesc": "これによりNexPanelが#version#に更新され、パネルサービスが再起動されます。",
       "panelUpdateStartedPopover": "パネルの更新を開始しました",
       "panelUpdateFailedTitle": "パネルの更新に失敗しました",
       "panelUpdateFailedDesc": "更新が正常に完了しませんでした。サーバーのログを確認するか、コマンドラインで「x-ui update」を実行してください。",
@@ -397,6 +397,25 @@
       "IPLimit": "IP制限",
       "IPLimitlog": "IPログ",
       "IPLimitlogclear": "ログをクリア",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "パネル設定から証明書を設定",
       "setDefaultCertEmpty": "パネル用の証明書が設定されていません。先に設定から指定してください。",
       "streamTab": "ストリーム",
@@ -728,6 +747,14 @@
         "excludeFromSubHelp": "このインバウンドを有効なまま運用しつつ、サブスクリプション出力からリンクを隠します。",
         "disableFlow": "XTLS フローを無効化",
         "disableFlowHelp": "トランスポートが flow に対応している場合でも（例: VLESS 暗号化付きのトンネル化された XHTTP インバウンド）、このインバウンドを xtls-rprx-vision の自動付与から除外します。クライアントは同じサブスクリプション内の他の対応インバウンドでは Vision を維持します。VLESS のみ。",
+        "ipLimit": "同時接続 IP 上限",
+        "ipLimitHelp": "このインバウンドで同時にオンラインになる重複しない送信元 IP の上限。0 = 無制限。複数のインバウンドに接続したクライアントは各インバウンドで数えます。",
+        "ipLimitAction": "上限超過時の動作",
+        "ipLimitActionHelp": "新規を拒否: 古いアドレスを残して新しいアドレスをブロック。最古を切断: 新しいアドレスを残して古いアドレスをブロック。",
+        "ipLimitActionOptions": {
+          "reject_new": "新規を拒否",
+          "kick_oldest": "最古を切断"
+        },
         "shareAddrStrategyOptions": {
           "node": "ノードアドレス",
           "listen": "インバウンドのリッスンアドレス",
@@ -824,6 +851,7 @@
       "first": "最初",
       "last": "最後",
       "ipLog": "IP ログ",
+      "ipHistory": "IP 履歴",
       "prefix": "プレフィックス",
       "postfix": "サフィックス",
       "delayedStart": "初回使用から開始",
@@ -855,10 +883,6 @@
       "totalGBDesc": "このクライアントのデータ割当量。0 = 無制限。",
       "expiryTime": "有効期限",
       "addClients": "クライアントを追加",
-      "limitIp": "IP 制限",
-      "limitIpDesc": "同時接続 IP の最大数。0 = 無制限。",
-      "limitHwid": "HWID 制限",
-      "limitHwidDesc": "サブスクリプション要求で登録できる最大デバイス数。0 = 無制限。",
       "hwidLog": "HWID デバイス",
       "hwidDevice": "登録済みデバイス",
       "noHwids": "HWID デバイスはまだありません",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "スポンサー",
-      "intro": "3X-UI の開発を支援している企業です。スポンサーリンクは新しいタブで開きます。",
+      "intro": "NexPanel の開発を支援している企業です。スポンサーリンクは新しいタブで開きます。",
       "become": "スポンサーになる",
       "tag": "スポンサー",
       "visit": "訪問",
       "yourBrand": "ここにあなたのブランドを",
-      "yourBrandText": "毎日 3X-UI を開く何千人ものサーバー管理者に御社をアピールできます。"
+      "yourBrandText": "毎日 NexPanel を開く何千人ものサーバー管理者に御社をアピールできます。"
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 定期報告：{{ .RunTime }}\r\n",
       "datetime": "⏰ 日時：{{ .DateTime }}\r\n",
       "hostname": "💻 ホスト: {{ .Hostname }}\r\n",
-      "version": "🚀 X-UI バージョン：{{ .Version }}\r\n",
+      "version": "🚀 NexPanel バージョン：{{ .Version }}\r\n",
       "xrayVersion": "📡 Xray バージョン: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "3x-ui Discord通知テスト",
+      "title": "NexPanel Discord通知テスト",
       "body": "これはDiscord通知が正しく設定されていることを確認するためのテスト通知です。"
     },
-    "footer": "3x-ui パネル",
+    "footer": "NexPanel パネル",
     "fields": {
       "panelVersion": "パネルバージョン",
       "xrayCore": "Xray コア",
@@ -2805,13 +2829,13 @@
       "loginFailed": "ログイン失敗"
     },
     "report": {
-      "title": "📊 3x-ui ステータスレポート",
+      "title": "📊 NexPanel ステータスレポート",
       "summary": "**{{ .Host }}** のサーバーとプロキシの定期ステータスレポート",
-      "footer": "3x-ui 定期レポート • スケジュール: {{ .RunTime }}"
+      "footer": "NexPanel 定期レポート • スケジュール: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 3x-ui Discord Bot コマンド",
-      "helpDescription": "3x-ui サーバーの監視と管理に使えるコマンド:",
+      "helpTitle": "🤖 NexPanel Discord Bot コマンド",
+      "helpDescription": "NexPanel サーバーの監視と管理に使えるコマンド:",
       "helpStatus": "システム負荷、RAM、CPU、接続数、オンラインユーザーを表示",
       "helpReport": "完全なステータスレポートを生成（設定されていればDBバックアップ付き）",
       "helpBackup": "データベースのバックアップファイルを今すぐ送信",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "設定済みのすべてのインバウンドをポートとクライアント統計付きで一覧表示",
       "helpRestart": "Xray コアを再起動",
       "helpHelp": "このコマンド一覧を表示",
-      "statusTitle": "⚡ 3x-ui サーバーステータス",
+      "statusTitle": "⚡ NexPanel サーバーステータス",
       "statusDescription": "**{{ .Host }}** の現在の稼働メトリクス",
       "backupTitle": "🗄️ データベースバックアップ",
-      "backupDescription": "`{{ .Time }}` に生成された 3x-ui のバックアップ",
+      "backupDescription": "`{{ .Time }}` に生成された NexPanel のバックアップ",
       "backupUnavailable": "❌ バックアップサービスを利用できません",
       "backupFailed": "❌ データベースのバックアップを読み込めませんでした: {{ .Error }}",
       "usageHint": "⚠️ 使い方: `!usage <email>` または `/usage <email>`",

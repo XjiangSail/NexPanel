@@ -63,6 +63,8 @@ type Inbound struct {
 	ExpiryTime           int64                `json:"expiryTime" form:"expiryTime"`                                                                                                                                 // Expiration timestamp
 	TrafficReset         string               `json:"trafficReset" form:"trafficReset" gorm:"default:never;index:idx_enable_traffic_reset,priority:2" validate:"omitempty,oneof=never hourly daily weekly monthly"` // Traffic reset schedule
 	TrafficResetDay      int                  `json:"trafficResetDay" form:"trafficResetDay" gorm:"default:1" validate:"omitempty,gte=1,lte=31" example:"1"`                                                        // Day of month for monthly traffic resets
+	LimitIP              int                  `json:"limitIp" form:"limitIp" gorm:"column:limit_ip;default:0" validate:"gte=0" example:"0"`                                                                         // Concurrent source-IP cap for this inbound
+	LimitAction          string               `json:"limitAction" form:"limitAction" gorm:"column:limit_action;default:reject_new" validate:"omitempty,oneof=reject_new kick_oldest" example:"reject_new"`          // Over-limit behaviour: reject the newest IPs or kick the oldest
 	LastTrafficResetTime int64                `json:"lastTrafficResetTime" form:"lastTrafficResetTime" gorm:"default:0"`                                                                                            // Last traffic reset timestamp
 	ClientStats          []xray.ClientTraffic `gorm:"foreignKey:InboundId;references:Id" json:"clientStats" form:"clientStats"`                                                                                     // Client traffic statistics
 
@@ -94,6 +96,9 @@ type Inbound struct {
 	// the master's externally reachable endpoint instead of the child's
 	// loopback listen. Not persisted.
 	FallbackParent *FallbackParentInfo `json:"fallbackParent,omitempty" gorm:"-"`
+
+	// OnlineIPCount is a read-time view of the live source IPs using this inbound.
+	OnlineIPCount int `json:"onlineIpCount" gorm:"-" example:"2"`
 }
 
 // FallbackParentInfo carries everything the frontend needs to rewrite a

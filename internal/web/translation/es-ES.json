@@ -155,7 +155,7 @@
       "xrayUpdates": "Actualizaciones de Xray",
       "xraySwitchClickDesk": "Elige sabiamente, ya que las versiones anteriores pueden no ser compatibles con las configuraciones actuales.",
       "updatePanel": "Actualizar panel",
-      "panelUpdateDesc": "Esto actualizará 3X-UI a la última versión y reiniciará el servicio del panel.",
+      "panelUpdateDesc": "Esto actualizará NexPanel a la última versión y reiniciará el servicio del panel.",
       "currentPanelVersion": "Versión actual del panel",
       "latestPanelVersion": "Última versión del panel",
       "panelUpToDate": "El panel está actualizado",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "Esto cambiará la versión de Xray a #version#.",
       "xraySwitchVersionPopover": "Xray se actualizó correctamente",
       "panelUpdateDialog": "¿Deseas actualizar el panel?",
-      "panelUpdateDialogDesc": "Esto actualizará 3X-UI a la versión #version# y reiniciará el servicio del panel.",
+      "panelUpdateDialogDesc": "Esto actualizará NexPanel a la versión #version# y reiniciará el servicio del panel.",
       "panelUpdateStartedPopover": "Actualización del panel iniciada",
       "panelUpdateFailedTitle": "Error al actualizar el panel",
       "panelUpdateFailedDesc": "La actualización no se completó correctamente. Revisa los registros del servidor o ejecuta 'x-ui update' desde la línea de comandos.",
@@ -397,6 +397,25 @@
       "IPLimit": "Límite de IP",
       "IPLimitlog": "Registro de IP",
       "IPLimitlogclear": "Limpiar el Registro",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "Establecer certificado desde el panel",
       "setDefaultCertEmpty": "No hay certificado configurado para el panel. Configura uno en Ajustes primero.",
       "streamTab": "Transmisión",
@@ -728,6 +747,14 @@
         "excludeFromSubHelp": "Oculta los enlaces de esta entrada en la salida de suscripción manteniendo la entrada habilitada y operativa.",
         "disableFlow": "Desactivar el flujo XTLS",
         "disableFlowHelp": "Excluye este inbound de la inyección automática de xtls-rprx-vision, incluso cuando su transporte admite flow (p. ej. un inbound XHTTP tunelizado con cifrado VLESS). Los clientes mantienen Vision en tus demás inbounds compatibles de la misma suscripción. Solo VLESS.",
+        "ipLimit": "Límite de IP simultáneas",
+        "ipLimitHelp": "Máximo de IP de origen distintas en línea en esta entrada a la vez. 0 = sin límite. Un cliente vinculado a varias entradas cuenta en cada una.",
+        "ipLimitAction": "Al superar el límite",
+        "ipLimitActionHelp": "Rechazar nuevo conserva las direcciones más antiguas y bloquea las nuevas; Expulsar el más antiguo conserva las nuevas y bloquea las antiguas.",
+        "ipLimitActionOptions": {
+          "reject_new": "Rechazar nuevo",
+          "kick_oldest": "Expulsar el más antiguo"
+        },
         "shareAddrStrategyOptions": {
           "node": "Dirección del nodo",
           "listen": "Dirección de escucha del inbound",
@@ -824,6 +851,7 @@
       "first": "Primero",
       "last": "Último",
       "ipLog": "Registro de IP",
+      "ipHistory": "Historial de IP",
       "prefix": "Prefijo",
       "postfix": "Sufijo",
       "delayedStart": "Iniciar tras el primer uso",
@@ -855,10 +883,6 @@
       "totalGBDesc": "Cuota de datos para este cliente. 0 = ilimitado.",
       "expiryTime": "Expiración",
       "addClients": "Añadir clientes",
-      "limitIp": "Límite de IP",
-      "limitIpDesc": "Máximo de IP simultáneas. 0 = ilimitado.",
-      "limitHwid": "Límite de HWID",
-      "limitHwidDesc": "Máximo de dispositivos registrados para solicitudes de suscripción. 0 = ilimitado.",
       "hwidLog": "Dispositivos HWID",
       "hwidDevice": "Dispositivo registrado",
       "noHwids": "Aún no hay dispositivos HWID",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "Patrocinadores",
-      "intro": "Empresas que apoyan el desarrollo de 3X-UI. Los enlaces patrocinados se abren en una pestaña nueva.",
+      "intro": "Empresas que apoyan el desarrollo de NexPanel. Los enlaces patrocinados se abren en una pestaña nueva.",
       "become": "Hazte patrocinador",
       "tag": "Patrocinador",
       "visit": "Visitar",
       "yourBrand": "Tu marca aquí",
-      "yourBrandText": "Muestra tu empresa a miles de administradores de servidores que abren 3X-UI cada día."
+      "yourBrandText": "Muestra tu empresa a miles de administradores de servidores que abren NexPanel cada día."
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 Informes programados: {{ .RunTime }}\r\n",
       "datetime": "⏰ Fecha y Hora: {{ .DateTime }}\r\n",
       "hostname": "💻 Host: {{ .Hostname }}\r\n",
-      "version": "🚀 Versión de X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Versión de NexPanel: {{ .Version }}\r\n",
       "xrayVersion": "📡 Versión de Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "Prueba de notificación de Discord de 3x-ui",
+      "title": "Prueba de notificación de Discord de NexPanel",
       "body": "Esta es una notificación de prueba que confirma que las notificaciones de Discord están configuradas correctamente."
     },
-    "footer": "Panel 3x-ui",
+    "footer": "Panel NexPanel",
     "fields": {
       "panelVersion": "Versión del panel",
       "xrayCore": "Núcleo Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "Inicio de sesión fallido"
     },
     "report": {
-      "title": "📊 Informe de estado de 3x-ui",
+      "title": "📊 Informe de estado de NexPanel",
       "summary": "Informe periódico del estado del servidor y del proxy de **{{ .Host }}**",
-      "footer": "Informe programado de 3x-ui • Programación: {{ .RunTime }}"
+      "footer": "Informe programado de NexPanel • Programación: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Comandos del bot de Discord de 3x-ui",
-      "helpDescription": "Comandos disponibles para supervisar y administrar el servidor 3x-ui:",
+      "helpTitle": "🤖 Comandos del bot de Discord de NexPanel",
+      "helpDescription": "Comandos disponibles para supervisar y administrar el servidor NexPanel:",
       "helpStatus": "Muestra la carga del sistema, RAM, CPU, conexiones y usuarios en línea",
       "helpReport": "Genera un informe de estado completo (con copia de seguridad de la BD si está configurada)",
       "helpBackup": "Envía de inmediato el archivo de copia de seguridad de la base de datos",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "Lista todas las entradas configuradas con puertos y estadísticas de clientes",
       "helpRestart": "Reinicia el núcleo Xray",
       "helpHelp": "Muestra esta lista de comandos disponibles",
-      "statusTitle": "⚡ Estado del servidor 3x-ui",
+      "statusTitle": "⚡ Estado del servidor NexPanel",
       "statusDescription": "Métricas operativas actuales de **{{ .Host }}**",
       "backupTitle": "🗄️ Copia de seguridad de la base de datos",
-      "backupDescription": "Archivo de copia de seguridad de 3x-ui generado el `{{ .Time }}`",
+      "backupDescription": "Archivo de copia de seguridad de NexPanel generado el `{{ .Time }}`",
       "backupUnavailable": "❌ Servicio de copia de seguridad no disponible",
       "backupFailed": "❌ No se pudo leer la copia de seguridad de la base de datos: {{ .Error }}",
       "usageHint": "⚠️ Uso: `!usage <email>` o `/usage <email>`",

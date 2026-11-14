@@ -894,6 +894,13 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 			updates["traffic_reset"] = snapIb.TrafficReset
 			updates["traffic_reset_day"] = normalizeTrafficResetDay(snapIb.TrafficResetDay)
 			updates["last_traffic_reset_time"] = snapIb.LastTrafficResetTime
+			// Old node builds omit both fields; absent means "no opinion", not 0.
+			if snapIb.LimitAction != "" || snapIb.LimitIP > 0 {
+				snapLimit := model.Inbound{LimitIP: snapIb.LimitIP, LimitAction: snapIb.LimitAction}
+				normalizeInboundLimit(&snapLimit)
+				updates["limit_ip"] = snapLimit.LimitIP
+				updates["limit_action"] = snapLimit.LimitAction
+			}
 		}
 		if !inGrace || (snapIb.Up+snapIb.Down) <= (c.Up+c.Down) {
 			updates["up"] = snapIb.Up

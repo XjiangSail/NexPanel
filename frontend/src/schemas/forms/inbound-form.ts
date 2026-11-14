@@ -83,6 +83,8 @@ export const InboundDbFieldsSchema = z.object({
   subSortIndex: z.number().int().default(1),
   excludeFromSub: z.boolean().default(false),
   disableFlow: z.boolean().default(false),
+  limitIp: z.number().int().min(0).default(0),
+  limitAction: z.enum(['reject_new', 'kick_oldest']).default('reject_new'),
 });
 export type InboundDbFields = z.infer<typeof InboundDbFieldsSchema>;
 

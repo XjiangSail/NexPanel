@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import {
   Alert,
+  Col,
   ConfigProvider,
   Form,
   Input,
   InputNumber,
   Modal,
   Radio,
+  Row,
   Select,
   Switch,
   Tabs,
@@ -774,6 +776,33 @@ export default function InboundFormModal({
       >
         <Switch />
       </FormField>
+
+      <Row gutter={16}>
+        <Col xs={24} md={12}>
+          <FormField
+            name="limitIp"
+            label={t('pages.inbounds.form.ipLimit')}
+            tooltip={t('pages.inbounds.form.ipLimitHelp')}
+            rules={{ validate: rhfZodValidate(InboundDbFieldsSchema.shape.limitIp) }}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </FormField>
+        </Col>
+        <Col xs={24} md={12}>
+          <FormField
+            name="limitAction"
+            label={t('pages.inbounds.form.ipLimitAction')}
+            tooltip={t('pages.inbounds.form.ipLimitActionHelp')}
+          >
+            <NativeSelect
+              options={(['reject_new', 'kick_oldest'] as const).map((action) => ({
+                value: action,
+                label: t(`pages.inbounds.form.ipLimitActionOptions.${action}`),
+              }))}
+            />
+          </FormField>
+        </Col>
+      </Row>
 
       {protocol === Protocols.VLESS && (
         <FormField

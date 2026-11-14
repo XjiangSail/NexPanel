@@ -83,13 +83,21 @@ func trimHwidMeta(s string) string {
 }
 
 func normalizeHwidRequest(req HwidRequest) HwidRequest {
-	return HwidRequest{
+	uaOS, uaVersion := deviceMetaFromUserAgent(req.UserAgent)
+	req = HwidRequest{
 		Hwid:        strings.TrimSpace(req.Hwid),
 		UserAgent:   trimHwidMeta(req.UserAgent),
 		DeviceOS:    trimHwidMeta(req.DeviceOS),
 		OsVersion:   trimHwidMeta(req.OsVersion),
 		DeviceModel: trimHwidMeta(req.DeviceModel),
 	}
+	if req.DeviceOS == "" {
+		req.DeviceOS = uaOS
+	}
+	if req.OsVersion == "" {
+		req.OsVersion = uaVersion
+	}
+	return req
 }
 
 // The subscription body is built for disabled clients too, so an expired,
@@ -111,6 +119,25 @@ func subIDHasEnabledClient(tx *gorm.DB, subID string) (bool, error) {
 		Where("sub_id = ? AND enable = ?", subID, true).
 		Count(&enabled).Error
 	return enabled > 0, err
+}
+
+// TrackHwidForSubID records device metadata without a client-level cap.
+// Per-client HWID limits are retired; inbound live-IP caps are authoritative.
+func (s *ClientService) TrackHwidForSubID(subID string, req HwidRequest) error {
+	subID = strings.TrimSpace(subID)
+	if subID == "" {
+		return nil
+	}
+	req = normalizeHwidRequest(req)
+	if len(req.Hwid) < minHwidLength {
+		return nil
+	}
+	db := database.GetDB()
+	known, err := subIDHasEnabledClient(db, subID)
+	if err != nil || !known {
+		return err
+	}
+	return upsertClientHwid(db, subID, req)
 }
 
 func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (HwidGateResult, error) {
@@ -203,12 +230,19 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	return res, err
 }
 
+func upsertClientHwid(db *gorm.DB, subID string, req HwidRequest) error {
+	now := time.Now().UnixMilli()
+	return db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "sub_id"}, {Name: "hwid_hash"}},
+		DoUpdates: clause.AssignmentColumns([]string{"last_seen", "user_agent", "device_os", "os_version", "device_model"}),
+	}).Create(&model.ClientHwid{SubID: subID, HwidHash: hashHwid(req.Hwid), FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel}).Error
+}
+
 // trackUnlimitedHwid lists devices of a sub with no HWID limit in the panel. It is
 // best-effort: a failed write must not deny a subscription nothing restricts.
 // False means the sub has a limit by now and no row was written.
 func trackUnlimitedHwid(db *gorm.DB, subID string, req HwidRequest) bool {
 	limited := false
-	now := time.Now().UnixMilli()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// A row landing behind setClientLimitHwidByEmailTx's trim would stay registered
 		// above the limit, so the caller's read does not count here.
@@ -219,10 +253,7 @@ func trackUnlimitedHwid(db *gorm.DB, subID string, req HwidRequest) bool {
 		if limited = limit > 0; limited {
 			return nil
 		}
-		return tx.Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "sub_id"}, {Name: "hwid_hash"}},
-			DoUpdates: clause.AssignmentColumns([]string{"last_seen", "user_agent", "device_os", "os_version", "device_model"}),
-		}).Create(&model.ClientHwid{SubID: subID, HwidHash: hashHwid(req.Hwid), FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel}).Error
+		return upsertClientHwid(tx, subID, req)
 	})
 	if err != nil {
 		logger.Warning("track HWID for unlimited subscription failed:", err)
@@ -283,18 +314,31 @@ func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) 
 	}
 	out := make([]ClientHwidInfo, 0, len(rows))
 	for _, r := range rows {
-		out = append(out, ClientHwidInfo{
-			Id:          r.Id,
-			FirstSeen:   r.FirstSeen,
-			LastSeen:    r.LastSeen,
-			UserAgent:   r.UserAgent,
-			DeviceOS:    r.DeviceOS,
-			OsVersion:   r.OsVersion,
-			DeviceModel: r.DeviceModel,
-			Fingerprint: shortHwidFingerprint(r.HwidHash),
-		})
+		out = append(out, clientHwidInfoFromRow(r))
 	}
 	return out, nil
+}
+
+func clientHwidInfoFromRow(r model.ClientHwid) ClientHwidInfo {
+	deviceOS, osVersion := r.DeviceOS, r.OsVersion
+	if deviceOS == "" {
+		// Rows written before user-agent parsing keep displaying a platform.
+		uaOS, uaVersion := deviceMetaFromUserAgent(r.UserAgent)
+		deviceOS = uaOS
+		if osVersion == "" {
+			osVersion = uaVersion
+		}
+	}
+	return ClientHwidInfo{
+		Id:          r.Id,
+		FirstSeen:   r.FirstSeen,
+		LastSeen:    r.LastSeen,
+		UserAgent:   r.UserAgent,
+		DeviceOS:    deviceOS,
+		OsVersion:   osVersion,
+		DeviceModel: r.DeviceModel,
+		Fingerprint: shortHwidFingerprint(r.HwidHash),
+	}
 }
 
 func (s *ClientService) ClearClientHwids(email string) error {

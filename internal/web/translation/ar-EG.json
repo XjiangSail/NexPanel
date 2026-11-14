@@ -155,7 +155,7 @@
       "xrayUpdates": "تحديثات Xray",
       "xraySwitchClickDesk": "اختار بحذر، النسخ القديمة ممكن ما تتوافقش مع الإعدادات الحالية.",
       "updatePanel": "تحديث البانل",
-      "panelUpdateDesc": "ده هيحدث 3X-UI لآخر إصدار وهيعيد تشغيل خدمة البانل.",
+      "panelUpdateDesc": "ده هيحدث NexPanel لآخر إصدار وهيعيد تشغيل خدمة البانل.",
       "currentPanelVersion": "إصدار البانل الحالي",
       "latestPanelVersion": "أحدث إصدار للبانل",
       "panelUpToDate": "البانل محدث لآخر إصدار",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "سيؤدي هذا إلى تغيير إصدار Xray إلى #version#.",
       "xraySwitchVersionPopover": "تم تحديث Xray بنجاح",
       "panelUpdateDialog": "هل فعلاً عايز تحدث البانل؟",
-      "panelUpdateDialogDesc": "ده هيحدث 3X-UI للإصدار #version# وهيعيد تشغيل البانل.",
+      "panelUpdateDialogDesc": "ده هيحدث NexPanel للإصدار #version# وهيعيد تشغيل البانل.",
       "panelUpdateStartedPopover": "بدأ تحديث البانل",
       "panelUpdateFailedTitle": "فشل تحديث البانل",
       "panelUpdateFailedDesc": "لم يكتمل التحديث بنجاح. تحقق من سجلات الخادم، أو نفّذ الأمر «x-ui update» من سطر الأوامر.",
@@ -397,6 +397,25 @@
       "IPLimit": "تحديد IP",
       "IPLimitlog": "سجل IP",
       "IPLimitlogclear": "امسح السجل",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "استخدم شهادة البانل",
       "setDefaultCertEmpty": "لا توجد شهادة معدّة للوحة. عينّ واحدة من الإعدادات أولاً.",
       "streamTab": "تدفق",
@@ -677,6 +696,14 @@
         "excludeFromSubHelp": "إخفاء روابط هذا الإدخال من مخرجات الاشتراك مع الإبقاء على الإدخال مفعّلاً ويعمل.",
         "disableFlow": "تعطيل تدفق XTLS",
         "disableFlowHelp": "استثناء هذا الـ inbound من الحقن التلقائي لـ xtls-rprx-vision، حتى عندما يكون النقل قادرًا على الـ flow (مثل inbound من نوع XHTTP عبر نفق مع تشفير VLESS). يحتفظ العملاء بـ Vision على باقي الـ inbounds القادرة ضمن نفس الاشتراك. لـ VLESS فقط.",
+        "ipLimit": "حد IP المتزامن",
+        "ipLimitHelp": "الحد الأقصى لعناوين IP المصدرية الفريدة المتصلة بهذا الدخول في وقت واحد. 0 = بلا حد. العميل المرتبط بعدة مدخلات يُحتسب في كل منها.",
+        "ipLimitAction": "الإجراء عند تجاوز الحد",
+        "ipLimitActionHelp": "رفض الجديد: يُبقي الأقدم ويحجب الأحدث؛ طرد الأقدم: يُبقي الأحدث ويحجب الأقدم.",
+        "ipLimitActionOptions": {
+          "reject_new": "رفض الجديد",
+          "kick_oldest": "طرد الأقدم"
+        },
         "shareAddrStrategyOptions": {
           "node": "عنوان العقدة",
           "listen": "عنوان استماع الوارد",
@@ -824,6 +851,7 @@
       "first": "أول",
       "last": "آخر",
       "ipLog": "سجل IP",
+      "ipHistory": "سجل عناوين IP",
       "prefix": "بادئة",
       "postfix": "لاحقة",
       "delayedStart": "البدء بعد أول استخدام",
@@ -855,10 +883,6 @@
       "totalGBDesc": "حصة البيانات لهذا العميل. 0 = غير محدود.",
       "expiryTime": "انتهاء الصلاحية",
       "addClients": "إضافة عملاء",
-      "limitIp": "حد عناوين IP",
-      "limitIpDesc": "الحد الأقصى لعناوين IP المتزامنة. 0 = غير محدود.",
-      "limitHwid": "حد HWID",
-      "limitHwidDesc": "الحد الأقصى للأجهزة المسجلة لطلبات الاشتراك. 0 = غير محدود.",
       "hwidLog": "أجهزة HWID",
       "hwidDevice": "جهاز مسجل",
       "noHwids": "لا توجد أجهزة HWID بعد",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "الرعاة",
-      "intro": "شركات تدعم تطوير 3X-UI. تُفتح روابط الرعاة في علامة تبويب جديدة.",
+      "intro": "شركات تدعم تطوير NexPanel. تُفتح روابط الرعاة في علامة تبويب جديدة.",
       "become": "كن راعيًا",
       "tag": "راعٍ",
       "visit": "زيارة",
       "yourBrand": "علامتك التجارية هنا",
-      "yourBrandText": "ضع شركتك أمام آلاف مسؤولي الخوادم الذين يفتحون 3X-UI كل يوم."
+      "yourBrandText": "ضع شركتك أمام آلاف مسؤولي الخوادم الذين يفتحون NexPanel كل يوم."
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 التقارير المجدولة: {{ .RunTime }}\r\n",
       "datetime": "⏰ التاريخ والوقت: {{ .DateTime }}\r\n",
       "hostname": "💻 المضيف: {{ .Hostname }}\r\n",
-      "version": "🚀 نسخة 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 نسخة NexPanel: {{ .Version }}\r\n",
       "xrayVersion": "📡 نسخة Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "اختبار إشعارات Discord في 3x-ui",
+      "title": "اختبار إشعارات Discord في NexPanel",
       "body": "هذا إشعار تجريبي يؤكد أن إشعارات Discord مُعدّة بشكل صحيح."
     },
-    "footer": "لوحة 3x-ui",
+    "footer": "لوحة NexPanel",
     "fields": {
       "panelVersion": "إصدار اللوحة",
       "xrayCore": "نواة Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "فشل تسجيل الدخول"
     },
     "report": {
-      "title": "📊 تقرير حالة 3x-ui",
+      "title": "📊 تقرير حالة NexPanel",
       "summary": "تقرير دوري عن حالة الخادم والوكيل لـ **{{ .Host }}**",
-      "footer": "تقرير 3x-ui المجدول • الجدول: {{ .RunTime }}"
+      "footer": "تقرير NexPanel المجدول • الجدول: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 أوامر بوت Discord في 3x-ui",
-      "helpDescription": "الأوامر المتاحة لمراقبة خادم 3x-ui وإدارته:",
+      "helpTitle": "🤖 أوامر بوت Discord في NexPanel",
+      "helpDescription": "الأوامر المتاحة لمراقبة خادم NexPanel وإدارته:",
       "helpStatus": "عرض حمل النظام والذاكرة والمعالج والاتصالات والمستخدمين المتصلين",
       "helpReport": "إنشاء تقرير حالة كامل (مع نسخة احتياطية لقاعدة البيانات إن كانت مفعّلة)",
       "helpBackup": "إرسال ملف النسخة الاحتياطية لقاعدة البيانات فورًا",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "عرض كل الواردات المُعدّة مع المنافذ وإحصاءات العملاء",
       "helpRestart": "إعادة تشغيل نواة Xray",
       "helpHelp": "عرض قائمة الأوامر المتاحة هذه",
-      "statusTitle": "⚡ حالة خادم 3x-ui",
+      "statusTitle": "⚡ حالة خادم NexPanel",
       "statusDescription": "مقاييس التشغيل الحالية لـ **{{ .Host }}**",
       "backupTitle": "🗄️ نسخة احتياطية لقاعدة البيانات",
-      "backupDescription": "أرشيف النسخة الاحتياطية لـ 3x-ui أُنشئ في `{{ .Time }}`",
+      "backupDescription": "أرشيف النسخة الاحتياطية لـ NexPanel أُنشئ في `{{ .Time }}`",
       "backupUnavailable": "❌ خدمة النسخ الاحتياطي غير متاحة",
       "backupFailed": "❌ تعذّرت قراءة النسخة الاحتياطية لقاعدة البيانات: {{ .Error }}",
       "usageHint": "⚠️ الاستخدام: `!usage <email>` أو `/usage <email>`",

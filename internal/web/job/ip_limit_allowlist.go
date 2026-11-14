@@ -4,8 +4,6 @@ import (
 	"net/netip"
 	"slices"
 	"strings"
-
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 // An address that matches is neither counted towards a client's IP limit nor
@@ -64,21 +62,4 @@ func (l ipLimitAllowlist) contains(ip string) bool {
 		}
 	}
 	return false
-}
-
-// split separates the entries an allowlist protects from the ones the limit
-// still applies to, preserving the caller's ordering in both.
-func (l ipLimitAllowlist) split(entries []model.ClientIpEntry) (limited, allowed []model.ClientIpEntry) {
-	if l.empty() {
-		return entries, nil
-	}
-	limited = make([]model.ClientIpEntry, 0, len(entries))
-	for _, entry := range entries {
-		if l.contains(entry.IP) {
-			allowed = append(allowed, entry)
-			continue
-		}
-		limited = append(limited, entry)
-	}
-	return limited, allowed
 }

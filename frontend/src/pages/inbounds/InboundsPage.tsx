@@ -51,6 +51,7 @@ import { LazyMount } from '@/components/utility';
 const InboundFormModal = lazy(() => import('./form/InboundFormModal'));
 const CloneInboundModal = lazy(() => import('./CloneInboundModal'));
 const InboundInfoModal = lazy(() => import('./info/InboundInfoModal'));
+const InboundLimitAuditModal = lazy(() => import('./list/InboundLimitAuditModal'));
 const AttachClientsModal = lazy(() => import('./clients/AttachClientsModal'));
 const AttachExistingClientsModal = lazy(() => import('./clients/AttachExistingClientsModal'));
 const DetachClientsModal = lazy(() => import('./clients/DetachClientsModal'));
@@ -69,7 +70,8 @@ type RowAction =
   | 'attachExisting'
   | 'detachClients'
   | 'addToGroup'
-  | 'clone';
+  | 'clone'
+  | 'limitAudit';
 
 type GeneralAction = 'import' | 'export' | 'subs' | 'resetInbounds';
 
@@ -164,6 +166,9 @@ export default function InboundsPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoDbInbound, setInfoDbInbound] = useState<DBInbound | null>(null);
   const [infoClientIndex, setInfoClientIndex] = useState(0);
+
+  const [auditOpen, setAuditOpen] = useState(false);
+  const [auditDbInbound, setAuditDbInbound] = useState<DBInbound | null>(null);
 
   const [attachOpen, setAttachOpen] = useState(false);
   const [attachSource, setAttachSource] = useState<DBInbound | null>(null);
@@ -653,6 +658,10 @@ export default function InboundsPage() {
           setInfoClientIndex(findClientIndex(target, null));
           setInfoOpen(true);
           break;
+        case 'limitAudit':
+          setAuditDbInbound(target);
+          setAuditOpen(true);
+          break;
         case 'export':
           exportInboundLinks(target);
           break;
@@ -822,6 +831,14 @@ export default function InboundsPage() {
             dbInbounds={dbInbounds}
             availableNodes={nodesList}
             availableNodesFetched={nodesFetched}
+          />
+        </LazyMount>
+        <LazyMount when={auditOpen}>
+          <InboundLimitAuditModal
+            open={auditOpen}
+            inboundId={auditDbInbound?.id}
+            remark={auditDbInbound?.remark}
+            onClose={() => setAuditOpen(false)}
           />
         </LazyMount>
         <LazyMount when={infoOpen}>

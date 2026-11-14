@@ -67,7 +67,7 @@ export interface Section {
 
 // /inbounds/update replaces the whole row, so it takes the same payload as /add.
 const inboundBody =
-  '{\n  "enable": true,\n  "remark": "VLESS-443",\n  "listen": "",\n  "port": 443,\n  "protocol": "vless",\n  "expiryTime": 0,\n  "total": 0,\n  "settings": {\n    "clients": [{ "id": "...", "email": "user1" }],\n    "decryption": "none"\n  },\n  "streamSettings": {\n    "network": "tcp",\n    "security": "reality",\n    "realitySettings": { "show": false, "dest": "..." }\n  },\n  "sniffing": {\n    "enabled": true,\n    "destOverride": ["http", "tls"]\n  }\n}';
+  '{\n  "enable": true,\n  "remark": "VLESS-443",\n  "listen": "",\n  "port": 443,\n  "protocol": "vless",\n  "expiryTime": 0,\n  "total": 0,\n  "limitIp": 0,\n  "limitAction": "reject_new",\n  "settings": {\n    "clients": [{ "id": "...", "email": "user1" }],\n    "decryption": "none"\n  },\n  "streamSettings": {\n    "network": "tcp",\n    "security": "reality",\n    "realitySettings": { "show": false, "dest": "..." }\n  },\n  "sniffing": {\n    "enabled": true,\n    "destOverride": ["http", "tls"]\n  }\n}';
 
 const outboundSubscriptionBodyParams: EndpointParam[] = [
   {
@@ -306,10 +306,19 @@ export const sections: readonly Section[] = [
         params: [{ name: 'id', in: 'path', type: 'number', desc: 'Inbound ID.' }],
       },
       {
+        method: 'GET',
+        path: '/panel/api/inbounds/:id/limitAudit',
+        summary:
+          'Node-level IP audit for one inbound: every attached client with its live IPs, IP history, registered devices, and the most recent over-limit rejections. Remote inbounds only expose data the master has synced.',
+        params: [{ name: 'id', in: 'path', type: 'number', desc: 'Inbound ID.' }],
+        response:
+          '{\n  "success": true,\n  "obj": {\n    "inboundId": 7,\n    "tag": "in-443",\n    "remark": "VLESS-443",\n    "limitIp": 3,\n    "limitAction": "kick_oldest",\n    "onlineIpCount": 2,\n    "remote": false,\n    "clients": [],\n    "rejections": []\n  }\n}',
+      },
+      {
         method: 'POST',
         path: '/panel/api/inbounds/add',
         summary:
-          'Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback arrays are normalized away; nonempty fallbacks cannot be combined with active server decryption.',
+          'Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable, limitIp, limitAction). limitIp caps distinct concurrent source IPs on this inbound (0 = unlimited); limitAction is reject_new (keep oldest, block newest) or kick_oldest (keep newest, block oldest). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback arrays are normalized away; nonempty fallbacks cannot be combined with active server decryption.',
         body: inboundBody,
         errorResponse: '{\n  "success": false,\n  "msg": "Port 443 is already in use"\n}',
       },
@@ -1622,8 +1631,17 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'POST',
+        path: '/panel/api/clients/ipHistory/:email',
+        summary:
+          'List every source IP recorded for a client, with the first and last time it connected. Survives the live IP window.',
+        params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
+        response:
+          '{\n  "success": true,\n  "obj": [\n    {\n      "ip": "203.0.113.7",\n      "firstSeen": "2026-11-01 09:12:33",\n      "lastSeen": "2026-11-13 18:40:02"\n    }\n  ]\n}',
+      },
+      {
+        method: 'POST',
         path: '/panel/api/clients/clearIps/:email',
-        summary: 'Reset the recorded IP list for a client.',
+        summary: 'Reset the recorded IP list and long-term IP history for a client.',
         params: [{ name: 'email', in: 'path', type: 'string', desc: 'Client email.' }],
       },
       {

@@ -226,7 +226,7 @@ export default function InboundInfoModal({
     setClientIpsArray([]);
     setClientIpsText('');
 
-    if (ipLimitEnable && (clientSet?.limitIp ?? 0) > 0 && stats?.email) {
+    if (ipLimitEnable && stats?.email) {
       const email = encodeURIComponent(stats.email);
       void HttpUtil.post(`/panel/api/clients/ips/${email}`).then((msg) => {
         if (!msg?.success) {
@@ -431,15 +431,7 @@ export default function InboundInfoModal({
               </td>
             </tr>
           )}
-          {ipLimitEnable && (
-            <tr>
-              <td>{t('pages.inbounds.IPLimit')}</td>
-              <td>
-                <Tag>{clientSettings?.limitIp ?? 0}</Tag>
-              </td>
-            </tr>
-          )}
-          {ipLimitEnable && (clientSettings?.limitIp ?? 0) > 0 && (
+          {ipLimitEnable && !!clientSettings?.email && (
             <tr>
               <td>{t('pages.inbounds.IPLimitlog')}</td>
               <td>

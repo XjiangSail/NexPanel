@@ -202,6 +202,7 @@ func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	s.enrichClientStats(db, inbounds)
 	s.annotateFallbackParents(db, inbounds)
 	s.annotateLocalOriginGuid(inbounds)
+	s.populateInboundOnlineIPCounts(inbounds)
 	return inbounds, nil
 }
 
@@ -247,6 +248,7 @@ func (s *InboundService) GetInboundsSlim(userId int) ([]*model.Inbound, error) {
 	}
 	s.annotateFallbackParents(db, inbounds)
 	s.annotateLocalOriginGuid(inbounds)
+	s.populateInboundOnlineIPCounts(inbounds)
 	// Top up stats rows owned by sibling inbounds (multi-attached clients)
 	// so the list's depleted/expiring badges see every client; the UUID/SubId
 	// enrichment stays skipped. Must run before slimming strips the settings.
@@ -1305,6 +1307,7 @@ func (s *InboundService) AddInbound(inbound *model.Inbound) (*model.Inbound, boo
 	}
 	legacyShareAddr := legacyMtprotoShareAddr(inbound)
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
+	normalizeInboundLimit(inbound)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
 	if !s.FromNodeSync {
@@ -1838,6 +1841,7 @@ func (s *InboundService) GetInboundDetail(id int) (*model.Inbound, error) {
 	}
 	s.enrichClientStats(db, []*model.Inbound{inbound})
 	s.overlayInboundsClientStats(db, []*model.Inbound{inbound})
+	s.populateInboundOnlineIPCounts([]*model.Inbound{inbound})
 	return inbound, nil
 }
 
@@ -2026,6 +2030,7 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 	defer InvalidateSubData()
 	legacyShareAddr := legacyMtprotoShareAddr(inbound)
 	inbound.TrafficResetDay = normalizeTrafficResetDay(inbound.TrafficResetDay)
+	normalizeInboundLimit(inbound)
 	// Normalize streamSettings based on protocol
 	s.normalizeStreamSettings(inbound)
 	if err := validateFinalMaskRealityCombo(inbound.StreamSettings); err != nil {
@@ -2238,6 +2243,8 @@ func (s *InboundService) UpdateInbound(inbound *model.Inbound) (*model.Inbound, 
 		oldInbound.ExpiryTime = inbound.ExpiryTime
 		oldInbound.TrafficReset = inbound.TrafficReset
 		oldInbound.TrafficResetDay = inbound.TrafficResetDay
+		oldInbound.LimitIP = inbound.LimitIP
+		oldInbound.LimitAction = inbound.LimitAction
 		oldInbound.Listen = inbound.Listen
 		oldInbound.Port = inbound.Port
 		oldInbound.Protocol = inbound.Protocol

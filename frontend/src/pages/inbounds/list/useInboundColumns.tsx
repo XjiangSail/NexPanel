@@ -185,6 +185,32 @@ export function useInboundColumns({
       });
     }
 
+    cols.push({
+      title: t('pages.inbounds.IPLimit'),
+      key: 'ipLimit',
+      align: 'center',
+      width: 100,
+      render: (_, record) => {
+        if (!record.limitIp) {
+          return <Tag>∞</Tag>;
+        }
+        const local = record.nodeId == null;
+        const count = record.onlineIpCount ?? 0;
+        const full = local && count >= record.limitIp;
+        return (
+          <Tooltip
+            title={t(`pages.inbounds.form.ipLimitActionOptions.${record.limitAction}`, {
+              defaultValue: record.limitAction,
+            })}
+          >
+            <Tag color={full ? 'red' : 'blue'}>
+              {local ? count : '-'}/{record.limitIp}
+            </Tag>
+          </Tooltip>
+        );
+      },
+    });
+
     if (hasAnySubSortIndex) {
       cols.push({
         title: (

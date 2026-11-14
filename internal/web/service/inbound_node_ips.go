@@ -9,6 +9,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -156,6 +157,15 @@ func (s *InboundService) MergeClientIpsByGuid(node *model.Node, trees map[string
 		if err := upsertNodeClientIps(guid, perEmail); err != nil {
 			return err
 		}
+	}
+	observed := make(map[string][]model.ClientIpEntry)
+	for _, perEmail := range trees {
+		for email, entries := range perEmail {
+			observed[email] = append(observed[email], entries...)
+		}
+	}
+	if err := s.RecordClientIpHistory(observed); err != nil {
+		logger.Debug("record client ip history from node attribution failed:", err)
 	}
 	return nil
 }

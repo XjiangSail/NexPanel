@@ -155,7 +155,7 @@
       "xrayUpdates": "Aktualizácie Xray",
       "xraySwitchClickDesk": "Verziu vyberajte opatrne. Staršie verzie nemusia podporovať aktuálnu konfiguráciu.",
       "updatePanel": "Aktualizovať panel",
-      "panelUpdateDesc": "Aktualizuje sa samotný 3X-UI na najnovšie vydanie a reštartuje sa služba panelu.",
+      "panelUpdateDesc": "Aktualizuje sa samotný NexPanel na najnovšie vydanie a reštartuje sa služba panelu.",
       "currentPanelVersion": "Aktuálna verzia panelu",
       "latestPanelVersion": "Najnovšia verzia panelu",
       "panelUpToDate": "Panel je aktuálny",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "Verzia Xray sa zmení na #version#.",
       "xraySwitchVersionPopover": "Xray bol úspešne aktualizovaný",
       "panelUpdateDialog": "Naozaj chcete aktualizovať panel?",
-      "panelUpdateDialogDesc": "3X-UI sa aktualizuje na #version# a reštartuje sa služba panelu.",
+      "panelUpdateDialogDesc": "NexPanel sa aktualizuje na #version# a reštartuje sa služba panelu.",
       "panelUpdateStartedPopover": "Aktualizácia panelu sa začala",
       "panelUpdateFailedTitle": "Aktualizácia panelu zlyhala",
       "panelUpdateFailedDesc": "Aktualizácia sa nedokončila úspešne. Skontrolujte záznamy servera alebo spustite príkaz 'x-ui update'.",
@@ -397,6 +397,25 @@
       "IPLimit": "Limit IP adries",
       "IPLimitlog": "Záznam IP adries",
       "IPLimitlogclear": "Vyčistiť záznam",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "Použiť certifikát panelu",
       "setDefaultCertEmpty": "Panel nemá nastavený certifikát. Najprv ho pridajte v nastaveniach.",
       "streamTab": "Prenos",
@@ -730,6 +749,14 @@
         "excludeFromSubHelp": "Skryť odkazy tohto vstupu v odbere konfigurácií. Vstup zostane zapnutý a funkčný.",
         "disableFlow": "Vypnúť režim XTLS flow",
         "disableFlowHelp": "Nepridávať tomuto vstupu automaticky xtls-rprx-vision, ani keď ho prenos podporuje (napr. tunelovaný vstup XHTTP so šifrovaním VLESS). Ostatné podporované vstupy v rovnakom odbere si Vision ponechajú. Iba pre VLESS.",
+        "ipLimit": "Limit súbežných IP",
+        "ipLimitHelp": "Maximálny počet jedinečných zdrojových IP online na tomto inbounde súčasne. 0 = bez limitu. Klient pripojený k viacerým inboundom sa počíta v každom.",
+        "ipLimitAction": "Akcia pri prekročení limitu",
+        "ipLimitActionHelp": "Odmietnuť nové: najstaršie adresy zostanú, najnovšie sa zablokujú; Vyhodiť najstaršie: najnovšie zostanú, najstaršie sa zablokujú.",
+        "ipLimitActionOptions": {
+          "reject_new": "Odmietnuť nové",
+          "kick_oldest": "Vyhodiť najstaršie"
+        },
         "shareAddrStrategyOptions": {
           "node": "Adresa servera",
           "listen": "Adresa počúvania vstupu",
@@ -824,6 +851,7 @@
       "first": "Prvý",
       "last": "Posledný",
       "ipLog": "Záznam IP adries",
+      "ipHistory": "História IP",
       "prefix": "Predpona",
       "postfix": "Prípona",
       "delayedStart": "Začať pri prvom použití",
@@ -855,10 +883,6 @@
       "totalGBDesc": "Dátový limit tohto klienta. Hodnota 0 znamená bez obmedzenia.",
       "expiryTime": "Platnosť do",
       "addClients": "Pridať klientov",
-      "limitIp": "Limit IP adries",
-      "limitIpDesc": "Najvyšší počet súčasne používaných IP adries. Hodnota 0 znamená bez obmedzenia.",
-      "limitHwid": "Limit zariadení HWID",
-      "limitHwidDesc": "Najvyšší počet registrovaných zariadení pre požiadavky na odber konfigurácií. Hodnota 0 znamená bez obmedzenia.",
       "hwidLog": "Zariadenia HWID",
       "hwidDevice": "Registrované zariadenie",
       "noHwids": "Zatiaľ nie sú registrované žiadne zariadenia HWID",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "Sponzori",
-      "intro": "Spoločnosti podporujúce vývoj 3X-UI. Sponzorované odkazy sa otvoria na novej karte.",
+      "intro": "Spoločnosti podporujúce vývoj NexPanel. Sponzorované odkazy sa otvoria na novej karte.",
       "become": "Stať sa sponzorom",
       "tag": "Sponzor",
       "visit": "Navštíviť",
       "yourBrand": "Miesto pre vašu značku",
-      "yourBrandText": "Predstavte svoju spoločnosť tisícom správcov serverov, ktorí denne otvárajú 3X-UI."
+      "yourBrandText": "Predstavte svoju spoločnosť tisícom správcov serverov, ktorí denne otvárajú NexPanel."
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 Plánované správy: {{ .RunTime }}\r\n",
       "datetime": "⏰ Dátum a čas: {{ .DateTime }}\r\n",
       "hostname": "💻 Hostiteľ: {{ .Hostname }}\r\n",
-      "version": "🚀 Verzia 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Verzia NexPanel: {{ .Version }}\r\n",
       "xrayVersion": "📡 Verzia Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "Skúška upozornení Discordu v 3x-ui",
+      "title": "Skúška upozornení Discordu v NexPanel",
       "body": "Toto je skúšobné upozornenie na overenie správneho nastavenia upozornení Discordu."
     },
-    "footer": "Panel 3x-ui",
+    "footer": "Panel NexPanel",
     "fields": {
       "panelVersion": "Verzia panelu",
       "xrayCore": "Jadro Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "Neúspešné prihlásenie"
     },
     "report": {
-      "title": "📊 Správa o stave 3x-ui",
+      "title": "📊 Správa o stave NexPanel",
       "summary": "Pravidelná správa o stave servera a proxy **{{ .Host }}**",
-      "footer": "Plánovaná správa 3x-ui • Plán: {{ .RunTime }}"
+      "footer": "Plánovaná správa NexPanel • Plán: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Príkazy Discord bota 3x-ui",
-      "helpDescription": "Dostupné príkazy na sledovanie a správu servera 3x-ui:",
+      "helpTitle": "🤖 Príkazy Discord bota NexPanel",
+      "helpDescription": "Dostupné príkazy na sledovanie a správu servera NexPanel:",
       "helpStatus": "Zobraziť záťaž systému, RAM, CPU, spojenia a pripojených používateľov",
       "helpReport": "Vytvoriť úplnú správu o stave, prípadne aj so zálohou databázy",
       "helpBackup": "Okamžite poslať súbor so zálohou databázy",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "Zobraziť všetky nastavené vstupy s portmi a štatistikami klientov",
       "helpRestart": "Reštartovať jadro Xray",
       "helpHelp": "Zobraziť tento zoznam dostupných príkazov",
-      "statusTitle": "⚡ Stav servera 3x-ui",
+      "statusTitle": "⚡ Stav servera NexPanel",
       "statusDescription": "Aktuálne prevádzkové údaje pre **{{ .Host }}**",
       "backupTitle": "🗄️ Záloha databázy",
-      "backupDescription": "Záloha 3x-ui vytvorená o `{{ .Time }}`",
+      "backupDescription": "Záloha NexPanel vytvorená o `{{ .Time }}`",
       "backupUnavailable": "❌ Služba zálohovania nie je dostupná",
       "backupFailed": "❌ Nepodarilo sa načítať zálohu databázy: {{ .Error }}",
       "usageHint": "⚠️ Použitie: `!usage <email>` alebo `/usage <email>`",

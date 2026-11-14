@@ -84,11 +84,9 @@ func requestSub(t *testing.T, router *gin.Engine, method string, path string, hw
 	return rec
 }
 
-func TestSubscriptionHwidGateAcrossBodyRoutes(t *testing.T) {
+func TestSubscriptionTracksHwidWithoutBlocking(t *testing.T) {
 	router, subID := initHwidSubRouter(t, 1)
 
-	// ?view=raw only tells /json/ and /clash/ to serve the body instead of the
-	// HTML page, so it stays gated like the plain route (#GHSA-7ww3).
 	bodyRoutes := []string{
 		"/sub/" + subID,
 		"/json/" + subID,
@@ -98,38 +96,31 @@ func TestSubscriptionHwidGateAcrossBodyRoutes(t *testing.T) {
 	}
 
 	for _, path := range bodyRoutes {
-		rec := requestSub(t, router, http.MethodGet, path, "", "")
-		if rec.Code != http.StatusNotFound {
-			t.Fatalf("%s missing HWID status = %d, want 404", path, rec.Code)
-		}
-		if rec.Header().Get("X-Hwid-Active") != "true" || rec.Header().Get("X-Hwid-Not-Supported") != "true" {
-			t.Fatalf("%s missing HWID headers = %#v", path, rec.Header())
+		if rec := requestSub(t, router, http.MethodGet, path, "", ""); rec.Code != http.StatusOK {
+			t.Fatalf("%s missing HWID status = %d, want 200", path, rec.Code)
 		}
 	}
 
-	rec := requestSub(t, router, http.MethodHead, "/sub/"+subID, "", "")
-	if rec.Code != http.StatusNotFound || rec.Header().Get("X-Hwid-Not-Supported") != "true" {
-		t.Fatalf("HEAD missing HWID = %d %#v", rec.Code, rec.Header())
+	if rec := requestSub(t, router, http.MethodHead, "/sub/"+subID, "", ""); rec.Code != http.StatusOK {
+		t.Fatalf("HEAD missing HWID = %d, want 200", rec.Code)
 	}
 
 	for _, path := range bodyRoutes {
-		rec = requestSub(t, router, http.MethodGet, path, "device-one", "")
-		if rec.Code != http.StatusOK {
-			t.Fatalf("%s registered HWID status = %d, body=%q", path, rec.Code, rec.Body.String())
-		}
-		if rec.Header().Get("X-Hwid-Active") != "true" {
-			t.Fatalf("%s allowed response missing active HWID header", path)
+		if rec := requestSub(t, router, http.MethodGet, path, "device-one", ""); rec.Code != http.StatusOK {
+			t.Fatalf("%s tracked HWID status = %d, body=%q", path, rec.Code, rec.Body.String())
 		}
 	}
+	// A second device is recorded too: the cap is now on the inbound's live IPs.
+	if rec := requestSub(t, router, http.MethodGet, bodyRoutes[0], "device-two", ""); rec.Code != http.StatusOK {
+		t.Fatalf("second device status = %d, want 200", rec.Code)
+	}
 
-	for _, path := range bodyRoutes {
-		rec = requestSub(t, router, http.MethodGet, path, "device-two", "")
-		if rec.Code != http.StatusNotFound {
-			t.Fatalf("%s new HWID after limit status = %d, want 404", path, rec.Code)
-		}
-		if rec.Header().Get("X-Hwid-Max-Devices-Reached") != "true" || rec.Header().Get("X-Hwid-Limit") != "true" {
-			t.Fatalf("%s limit headers missing: %#v", path, rec.Header())
-		}
+	var count int64
+	if err := database.GetDB().Model(&model.ClientHwid{}).Where("sub_id = ?", subID).Count(&count).Error; err != nil {
+		t.Fatalf("count hwids: %v", err)
+	}
+	if count != 2 {
+		t.Fatalf("tracked devices = %d, want 2", count)
 	}
 }
 

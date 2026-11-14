@@ -53,7 +53,6 @@ import type {
   ExternalLink,
   ExternalLinkInput,
 } from '@/hooks/useClients';
-import { useFail2banStatusQuery, getLimitIpNotice } from '@/api/queries/useFail2banStatusQuery';
 import ClientRenewalFields from './ClientRenewalFields';
 import { ClientFormSchema, ClientCreateFormSchema, type ClientFormValues } from '@/schemas/client';
 import './ClientFormModal.css';
@@ -282,10 +281,8 @@ export default function ClientFormModal({
   const trafficReset = useWatch({ control: methods.control, name: 'trafficReset' });
   const password = useWatch({ control: methods.control, name: 'password' });
   const subId = useWatch({ control: methods.control, name: 'subId' });
-  const limitHwid = useWatch({ control: methods.control, name: 'limitHwid' });
   const auth = useWatch({ control: methods.control, name: 'auth' });
   const wgPrivateKey = useWatch({ control: methods.control, name: 'wgPrivateKey' });
-  const limitIp = useWatch({ control: methods.control, name: 'limitIp' });
   const {
     fields: externalLinkFields,
     append: appendExternalLink,
@@ -311,9 +308,6 @@ export default function ClientFormModal({
   const { datepicker } = useDatepicker();
   const hwidDateLabel = (ts: number) =>
     !ts || ts <= 0 ? '-' : IntlUtil.formatDate(ts, datepicker);
-  const fail2ban = useFail2banStatusQuery();
-  const limitIpDisabled = !fail2ban.usable;
-  const limitIpNotice = getLimitIpNotice(fail2ban, t);
 
   // Declared ahead of the seeding effect below (which needs them to resolve
   // which specific wg/awg inbound this client is attached to, for seeding
@@ -983,80 +977,28 @@ export default function ClientFormModal({
                             <InputNumber min={0} step={1} style={{ width: '100%' }} />
                           </FormField>
                         </Col>
-                        <Col xs={24} md={12}>
-                          <Form.Item
-                            htmlFor={`${uid}-limit-ip`}
-                            label={t('pages.clients.limitIp')}
-                            tooltip={t('pages.clients.limitIpDesc')}
-                          >
-                            <Tooltip title={limitIpNotice || undefined}>
-                              <span style={{ display: 'flex', width: '100%' }}>
-                                <Space.Compact style={{ display: 'flex', flex: 1 }}>
-                                  <InputNumber
-                                    id={`${uid}-limit-ip`}
-                                    aria-describedby={`${uid}-limit-ip-hint`}
-                                    value={limitIp}
-                                    min={0}
-                                    disabled={limitIpDisabled}
-                                    style={{
-                                      flex: 1,
-                                      ...(limitIpDisabled ? { pointerEvents: 'none' } : null),
-                                    }}
-                                    onChange={(v) => methods.setValue('limitIp', Number(v) || 0)}
-                                  />
-                                  {isEdit && (
-                                    <Tooltip title={t('pages.clients.ipLog')}>
-                                      <Button
-                                        aria-label={t('pages.clients.ipLog')}
-                                        icon={<EyeOutlined aria-hidden />}
-                                        loading={ipsLoading}
-                                        onClick={openIpsModal}
-                                      >
-                                        {clientIps.length > 0 ? clientIps.length : ''}
-                                      </Button>
-                                    </Tooltip>
-                                  )}
-                                </Space.Compact>
-                              </span>
-                            </Tooltip>
-                            <span id={`${uid}-limit-ip-hint`} hidden>
-                              {t('pages.clients.limitIpDesc')}
-                            </span>
-                          </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                          <Form.Item
-                            htmlFor={`${uid}-limit-hwid`}
-                            label={t('pages.clients.limitHwid')}
-                            tooltip={t('pages.clients.limitHwidDesc')}
-                          >
-                            <Space.Compact style={{ display: 'flex' }}>
-                              <InputNumber
-                                id={`${uid}-limit-hwid`}
-                                aria-describedby={`${uid}-limit-hwid-hint`}
-                                value={limitHwid}
-                                min={0}
-                                style={{ flex: 1 }}
-                                onChange={(v) => methods.setValue('limitHwid', Number(v) || 0)}
-                              />
-                              {isEdit && (
-                                <Tooltip title={t('pages.clients.hwidLog')}>
-                                  <Button
-                                    aria-label={t('pages.clients.hwidLog')}
-                                    icon={<EyeOutlined aria-hidden />}
-                                    loading={hwidsLoading}
-                                    onClick={openHwidsModal}
-                                  >
-                                    {clientHwids.length > 0 ? clientHwids.length : ''}
-                                  </Button>
-                                </Tooltip>
-                              )}
-                            </Space.Compact>
-                            <span id={`${uid}-limit-hwid-hint`} hidden>
-                              {t('pages.clients.limitHwidDesc')}
-                            </span>
-                          </Form.Item>
-                        </Col>
+                        {isEdit && (
+                          <Col xs={24}>
+                            <Space>
+                              <Button
+                                icon={<EyeOutlined aria-hidden />}
+                                loading={ipsLoading}
+                                onClick={openIpsModal}
+                              >
+                                {t('pages.clients.ipLog')}
+                                {clientIps.length > 0 ? ` (${clientIps.length})` : ''}
+                              </Button>
+                              <Button
+                                icon={<EyeOutlined aria-hidden />}
+                                loading={hwidsLoading}
+                                onClick={openHwidsModal}
+                              >
+                                {t('pages.clients.hwidLog')}
+                                {clientHwids.length > 0 ? ` (${clientHwids.length})` : ''}
+                              </Button>
+                            </Space>
+                          </Col>
+                        )}
                       </Row>
 
                       <Row gutter={16}>

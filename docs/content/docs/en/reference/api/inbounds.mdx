@@ -53,13 +53,21 @@ _openapi:
       title: Fetch a single inbound by numeric ID.
       url: '#fetch-a-single-inbound-by-numeric-id'
     - depth: 2
+      title: 'Node-level IP audit for one inbound: every attached client with its live
+        IPs, IP history, registered devices, and the most recent over-limit
+        rejections. Remote inbounds only expose data the master has synced.'
+      url: '#node-level-ip-audit-for-one-inbound-every-attached-client-with-its-live-ips-ip-history-registered-devices-and-the-most-recent-over-limit-rejections-remote-inbounds-only-expose-data-the-master-has-synced'
+    - depth: 2
       title: Create a new inbound. Send the full inbound payload (protocol, port,
-        settings, streamSettings, sniffing, remark, expiryTime, total, enable).
-        settings, streamSettings, and sniffing may be sent as nested JSON
-        objects (preferred) or as JSON-encoded strings (legacy). VLESS empty
-        fallback arrays are normalized away; nonempty fallbacks cannot be
-        combined with active server decryption.
-      url: '#create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy-vless-empty-fallback-arrays-are-normalized-away-nonempty-fallbacks-cannot-be-combined-with-active-server-decryption'
+        settings, streamSettings, sniffing, remark, expiryTime, total, enable,
+        limitIp, limitAction). limitIp caps distinct concurrent source IPs on
+        this inbound (0 = unlimited); limitAction is reject_new (keep oldest,
+        block newest) or kick_oldest (keep newest, block oldest). settings,
+        streamSettings, and sniffing may be sent as nested JSON objects
+        (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback
+        arrays are normalized away; nonempty fallbacks cannot be combined with
+        active server decryption.
+      url: '#create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-limitip-limitaction-limitip-caps-distinct-concurrent-source-ips-on-this-inbound-0--unlimited-limitaction-is-reject_new-keep-oldest-block-newest-or-kick_oldest-keep-newest-block-oldest-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy-vless-empty-fallback-arrays-are-normalized-away-nonempty-fallbacks-cannot-be-combined-with-active-server-decryption'
     - depth: 2
       title: Delete an inbound by ID. Also removes its associated client stats rows.
       url: '#delete-an-inbound-by-id-also-removes-its-associated-client-stats-rows'
@@ -161,13 +169,21 @@ _openapi:
         id: return-every-protocol-url-vless-vmess-trojan-ss-hysteria-mtproto-across-all-inbounds-and-all-of-their-clients-links-are-rendered-through-the-subscription-engine-so-the-configured-remark-template-name-only-display-part-is-applied-per-client--the-same-output-the-client-infoqr-pages-use-protocols-without-a-url-form-socks-http-mixed-wireguard-dokodemo-tunnel-contribute-nothing-used-by-the-panels-export-all-inbound-links-action
       - content: Fetch a single inbound by numeric ID.
         id: fetch-a-single-inbound-by-numeric-id
+      - content: 'Node-level IP audit for one inbound: every attached client with its
+          live IPs, IP history, registered devices, and the most recent
+          over-limit rejections. Remote inbounds only expose data the master has
+          synced.'
+        id: node-level-ip-audit-for-one-inbound-every-attached-client-with-its-live-ips-ip-history-registered-devices-and-the-most-recent-over-limit-rejections-remote-inbounds-only-expose-data-the-master-has-synced
       - content: Create a new inbound. Send the full inbound payload (protocol, port,
-          settings, streamSettings, sniffing, remark, expiryTime, total,
-          enable). settings, streamSettings, and sniffing may be sent as nested
-          JSON objects (preferred) or as JSON-encoded strings (legacy). VLESS
-          empty fallback arrays are normalized away; nonempty fallbacks cannot
-          be combined with active server decryption.
-        id: create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy-vless-empty-fallback-arrays-are-normalized-away-nonempty-fallbacks-cannot-be-combined-with-active-server-decryption
+          settings, streamSettings, sniffing, remark, expiryTime, total, enable,
+          limitIp, limitAction). limitIp caps distinct concurrent source IPs on
+          this inbound (0 = unlimited); limitAction is reject_new (keep oldest,
+          block newest) or kick_oldest (keep newest, block oldest). settings,
+          streamSettings, and sniffing may be sent as nested JSON objects
+          (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback
+          arrays are normalized away; nonempty fallbacks cannot be combined with
+          active server decryption.
+        id: create-a-new-inbound-send-the-full-inbound-payload-protocol-port-settings-streamsettings-sniffing-remark-expirytime-total-enable-limitip-limitaction-limitip-caps-distinct-concurrent-source-ips-on-this-inbound-0--unlimited-limitaction-is-reject_new-keep-oldest-block-newest-or-kick_oldest-keep-newest-block-oldest-settings-streamsettings-and-sniffing-may-be-sent-as-nested-json-objects-preferred-or-as-json-encoded-strings-legacy-vless-empty-fallback-arrays-are-normalized-away-nonempty-fallbacks-cannot-be-combined-with-active-server-decryption
       - content: Delete an inbound by ID. Also removes its associated client stats rows.
         id: delete-an-inbound-by-id-also-removes-its-associated-client-stats-rows
       - content: Delete many inbounds in one call. Processes the list sequentially;
@@ -228,7 +244,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/inbounds/list","method":"get"},{"path":"/panel/api/inbounds/list/slim","method":"get"},{"path":"/panel/api/inbounds/options","method":"get"},{"path":"/panel/api/inbounds/amneziawgKernelReadiness","method":"get"},{"path":"/panel/api/inbounds/allLinks","method":"get"},{"path":"/panel/api/inbounds/get/{id}","method":"get"},{"path":"/panel/api/inbounds/add","method":"post"},{"path":"/panel/api/inbounds/del/{id}","method":"post"},{"path":"/panel/api/inbounds/bulkDel","method":"post"},{"path":"/panel/api/inbounds/update/{id}","method":"post"},{"path":"/panel/api/inbounds/setEnable/{id}","method":"post"},{"path":"/panel/api/inbounds/{id}/subSortIndex","method":"post"},{"path":"/panel/api/inbounds/{id}/resetTraffic","method":"post"},{"path":"/panel/api/inbounds/{id}/delAllClients","method":"post"},{"path":"/panel/api/inbounds/resetAllTraffics","method":"post"},{"path":"/panel/api/inbounds/import","method":"post"},{"path":"/panel/api/inbounds/pushClientTraffics","method":"post"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"get"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"post"}]} showTitle />
+      <OpenAPIPage document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/inbounds/list","method":"get"},{"path":"/panel/api/inbounds/list/slim","method":"get"},{"path":"/panel/api/inbounds/options","method":"get"},{"path":"/panel/api/inbounds/amneziawgKernelReadiness","method":"get"},{"path":"/panel/api/inbounds/allLinks","method":"get"},{"path":"/panel/api/inbounds/get/{id}","method":"get"},{"path":"/panel/api/inbounds/{id}/limitAudit","method":"get"},{"path":"/panel/api/inbounds/add","method":"post"},{"path":"/panel/api/inbounds/del/{id}","method":"post"},{"path":"/panel/api/inbounds/bulkDel","method":"post"},{"path":"/panel/api/inbounds/update/{id}","method":"post"},{"path":"/panel/api/inbounds/setEnable/{id}","method":"post"},{"path":"/panel/api/inbounds/{id}/subSortIndex","method":"post"},{"path":"/panel/api/inbounds/{id}/resetTraffic","method":"post"},{"path":"/panel/api/inbounds/{id}/delAllClients","method":"post"},{"path":"/panel/api/inbounds/resetAllTraffics","method":"post"},{"path":"/panel/api/inbounds/import","method":"post"},{"path":"/panel/api/inbounds/pushClientTraffics","method":"post"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"get"},{"path":"/panel/api/inbounds/{id}/fallbacks","method":"post"}]} showTitle />
     </>
   );
 }

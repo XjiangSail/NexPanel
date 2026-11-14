@@ -1,4 +1,4 @@
-export const appName = '3x-ui';
+export const appName = 'NexPanel';
 export const appTagline = 'Advanced web panel for managing Xray-core servers';
 
 export const docsRoute = '/docs';

@@ -36,6 +36,9 @@ export interface DBInboundRecord extends ProtocolFlags {
   nodeId?: number | null;
   settings: unknown;
   streamSettings: unknown;
+  limitIp: number;
+  limitAction: string;
+  onlineIpCount: number;
 }
 
 export interface ClientCountEntry {
@@ -61,7 +64,8 @@ export type RowAction =
   | 'delete'
   | 'resetTraffic'
   | 'delAllClients'
-  | 'clone';
+  | 'clone'
+  | 'limitAudit';
 
 export type GeneralAction = 'import' | 'export' | 'subs' | 'resetInbounds';
 

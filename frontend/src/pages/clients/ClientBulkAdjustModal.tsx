@@ -127,19 +127,6 @@ export default function ClientBulkAdjustModal({
               />
             </FormField>
             <FormField
-              name="limitHwid"
-              label={t('pages.clients.limitHwid')}
-              tooltip={t('pages.clients.limitHwidDesc')}
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                min={0}
-                step={1}
-                precision={0}
-                placeholder={t('pages.clients.bulkFlowNoChange')}
-              />
-            </FormField>
-            <FormField
               name="adTag"
               label={t('pages.clients.mtprotoAdTag')}
               extra={t('pages.clients.bulkAdTagHint')}

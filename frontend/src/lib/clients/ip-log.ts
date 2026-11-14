@@ -7,6 +7,31 @@ export type ClientIpInfo = {
   node: string;
 };
 
+// One row from POST /panel/api/clients/ipHistory/:email. The timestamps arrive
+// formatted by the panel, so the UI renders them verbatim.
+export type ClientIpHistoryInfo = {
+  ip: string;
+  firstSeen: string;
+  lastSeen: string;
+};
+
+export function normalizeClientIpHistory(obj: unknown): ClientIpHistoryInfo[] {
+  if (!Array.isArray(obj)) return [];
+  const out: ClientIpHistoryInfo[] = [];
+  for (const x of obj) {
+    if (!x || typeof x !== 'object') continue;
+    const o = x as Record<string, unknown>;
+    const ip = typeof o.ip === 'string' ? o.ip : '';
+    if (!ip) continue;
+    out.push({
+      ip,
+      firstSeen: typeof o.firstSeen === 'string' ? o.firstSeen : '',
+      lastSeen: typeof o.lastSeen === 'string' ? o.lastSeen : '',
+    });
+  }
+  return out;
+}
+
 // normalizeClientIps accepts the API payload and returns typed entries. It also
 // tolerates the legacy shape (a plain array of "ip (time)" strings) so the UI
 // keeps working against older panels.

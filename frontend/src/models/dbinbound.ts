@@ -46,6 +46,9 @@ export type DBInboundInit = Partial<{
   subSortIndex: number;
   excludeFromSub: boolean;
   disableFlow: boolean;
+  limitIp: number;
+  limitAction: string;
+  onlineIpCount: number;
   originNodeGuid: string;
   fallbackParent: FallbackParentRef | null;
 }>;
@@ -96,6 +99,9 @@ export class DBInbound {
   subSortIndex: number;
   excludeFromSub: boolean;
   disableFlow: boolean;
+  limitIp: number;
+  limitAction: string;
+  onlineIpCount: number;
   originNodeGuid: string;
   fallbackParent: FallbackParentRef | null;
 
@@ -128,6 +134,9 @@ export class DBInbound {
     this.subSortIndex = 1;
     this.excludeFromSub = false;
     this.disableFlow = false;
+    this.limitIp = 0;
+    this.limitAction = 'reject_new';
+    this.onlineIpCount = 0;
     this.originNodeGuid = '';
     this.fallbackParent = null;
     if (data == null) {

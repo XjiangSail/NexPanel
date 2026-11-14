@@ -46,6 +46,8 @@ func migrationModels() []any {
 		&xray.ClientTraffic{},
 		&model.OutboundTraffics{},
 		&model.InboundClientIps{},
+		&model.ClientIpHistory{},
+		&model.InboundIpRejection{},
 		&model.ClientRecord{},
 		&model.ClientInbound{},
 		&model.ClientHwid{},

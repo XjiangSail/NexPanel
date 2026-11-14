@@ -155,7 +155,7 @@
       "xrayUpdates": "Pembaruan Xray",
       "xraySwitchClickDesk": "Pilih dengan hati-hati, karena versi yang lebih lama mungkin tidak kompatibel dengan konfigurasi saat ini.",
       "updatePanel": "Perbarui Panel",
-      "panelUpdateDesc": "Ini akan memperbarui 3X-UI ke rilis terbaru dan me-restart layanan panel.",
+      "panelUpdateDesc": "Ini akan memperbarui NexPanel ke rilis terbaru dan me-restart layanan panel.",
       "currentPanelVersion": "Versi panel saat ini",
       "latestPanelVersion": "Versi panel terbaru",
       "panelUpToDate": "Panel sudah terbaru",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "Ini akan mengubah versi Xray ke #version#.",
       "xraySwitchVersionPopover": "Xray berhasil diperbarui",
       "panelUpdateDialog": "Apakah Anda benar-benar ingin memperbarui panel?",
-      "panelUpdateDialogDesc": "Ini akan memperbarui 3X-UI ke #version# dan me-restart layanan panel.",
+      "panelUpdateDialogDesc": "Ini akan memperbarui NexPanel ke #version# dan me-restart layanan panel.",
       "panelUpdateStartedPopover": "Pembaruan panel dimulai",
       "panelUpdateFailedTitle": "Pembaruan panel gagal",
       "panelUpdateFailedDesc": "Pembaruan tidak selesai dengan sukses. Periksa log server, atau jalankan 'x-ui update' dari baris perintah.",
@@ -397,6 +397,25 @@
       "IPLimit": "Batas IP",
       "IPLimitlog": "Log IP",
       "IPLimitlogclear": "Hapus Log",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "Atur Sertifikat dari Panel",
       "setDefaultCertEmpty": "Tidak ada sertifikat yang dikonfigurasi untuk panel. Atur dulu di Pengaturan.",
       "streamTab": "Aliran",
@@ -677,6 +696,14 @@
         "excludeFromSubHelp": "Sembunyikan tautan inbound ini dari keluaran langganan sambil tetap menjaga inbound tetap aktif dan beroperasi.",
         "disableFlow": "Nonaktifkan flow XTLS",
         "disableFlowHelp": "Kecualikan inbound ini dari injeksi otomatis xtls-rprx-vision, meskipun transport-nya mendukung flow (mis. inbound XHTTP yang dituneling dengan enkripsi VLESS). Klien tetap memakai Vision pada inbound lain yang mendukung dalam langganan yang sama. Hanya VLESS.",
+        "ipLimit": "Batas IP bersamaan",
+        "ipLimitHelp": "Maksimum IP sumber unik yang online pada inbound ini secara bersamaan. 0 = tanpa batas. Klien yang terhubung ke beberapa inbound dihitung di masing-masing.",
+        "ipLimitAction": "Saat melebihi batas",
+        "ipLimitActionHelp": "Tolak baru menyimpan alamat terlama dan memblokir yang terbaru; Keluarkan terlama menyimpan yang terbaru dan memblokir yang terlama.",
+        "ipLimitActionOptions": {
+          "reject_new": "Tolak baru",
+          "kick_oldest": "Keluarkan terlama"
+        },
         "shareAddrStrategyOptions": {
           "node": "Alamat node",
           "listen": "Alamat listen inbound",
@@ -824,6 +851,7 @@
       "first": "Pertama",
       "last": "Terakhir",
       "ipLog": "Log IP",
+      "ipHistory": "Riwayat IP",
       "prefix": "Awalan",
       "postfix": "Akhiran",
       "delayedStart": "Mulai setelah penggunaan pertama",
@@ -855,10 +883,6 @@
       "totalGBDesc": "Kuota data untuk klien ini. 0 = tidak terbatas.",
       "expiryTime": "Kedaluwarsa",
       "addClients": "Tambah klien",
-      "limitIp": "Batas IP",
-      "limitIpDesc": "Jumlah maksimum IP bersamaan. 0 = tidak terbatas.",
-      "limitHwid": "Batas HWID",
-      "limitHwidDesc": "Jumlah maksimum perangkat terdaftar untuk permintaan langganan. 0 = tidak terbatas.",
       "hwidLog": "Perangkat HWID",
       "hwidDevice": "Perangkat terdaftar",
       "noHwids": "Belum ada perangkat HWID",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "Sponsor",
-      "intro": "Perusahaan yang mendukung pengembangan 3X-UI. Tautan sponsor dibuka di tab baru.",
+      "intro": "Perusahaan yang mendukung pengembangan NexPanel. Tautan sponsor dibuka di tab baru.",
       "become": "Jadi sponsor",
       "tag": "Sponsor",
       "visit": "Kunjungi",
       "yourBrand": "Merek Anda di sini",
-      "yourBrandText": "Tampilkan perusahaan Anda kepada ribuan admin server yang membuka 3X-UI setiap hari."
+      "yourBrandText": "Tampilkan perusahaan Anda kepada ribuan admin server yang membuka NexPanel setiap hari."
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 Laporan Terjadwal: {{ .RunTime }}\r\n",
       "datetime": "⏰ Tanggal & Waktu: {{ .DateTime }}\r\n",
       "hostname": "💻 Host: {{ .Hostname }}\r\n",
-      "version": "🚀 Versi 3X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Versi NexPanel: {{ .Version }}\r\n",
       "xrayVersion": "📡 Versi Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "Uji Notifikasi Discord 3x-ui",
+      "title": "Uji Notifikasi Discord NexPanel",
       "body": "Ini adalah notifikasi uji yang memastikan notifikasi Discord telah dikonfigurasi dengan benar."
     },
-    "footer": "Panel 3x-ui",
+    "footer": "Panel NexPanel",
     "fields": {
       "panelVersion": "Versi Panel",
       "xrayCore": "Inti Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "Login Gagal"
     },
     "report": {
-      "title": "📊 Laporan Status 3x-ui",
+      "title": "📊 Laporan Status NexPanel",
       "summary": "Laporan berkala status server dan proxy untuk **{{ .Host }}**",
-      "footer": "Laporan Terjadwal 3x-ui • Jadwal: {{ .RunTime }}"
+      "footer": "Laporan Terjadwal NexPanel • Jadwal: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Perintah Bot Discord 3x-ui",
-      "helpDescription": "Perintah yang tersedia untuk memantau dan mengelola server 3x-ui:",
+      "helpTitle": "🤖 Perintah Bot Discord NexPanel",
+      "helpDescription": "Perintah yang tersedia untuk memantau dan mengelola server NexPanel:",
       "helpStatus": "Tampilkan beban sistem, RAM, CPU, koneksi, dan pengguna online",
       "helpReport": "Buat laporan status lengkap (dengan cadangan DB jika dikonfigurasi)",
       "helpBackup": "Kirim file cadangan database sekarang juga",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "Daftar semua inbound yang dikonfigurasi beserta port dan statistik klien",
       "helpRestart": "Mulai ulang inti Xray",
       "helpHelp": "Tampilkan daftar perintah ini",
-      "statusTitle": "⚡ Status Server 3x-ui",
+      "statusTitle": "⚡ Status Server NexPanel",
       "statusDescription": "Metrik operasional terkini untuk **{{ .Host }}**",
       "backupTitle": "🗄️ Cadangan Database",
-      "backupDescription": "Arsip cadangan 3x-ui dibuat pada `{{ .Time }}`",
+      "backupDescription": "Arsip cadangan NexPanel dibuat pada `{{ .Time }}`",
       "backupUnavailable": "❌ Layanan cadangan tidak tersedia",
       "backupFailed": "❌ Gagal membaca cadangan database: {{ .Error }}",
       "usageHint": "⚠️ Penggunaan: `!usage <email>` atau `/usage <email>`",

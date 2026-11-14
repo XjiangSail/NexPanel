@@ -715,7 +715,9 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 }
 
 func (a *SUBController) enforceHwid(c *gin.Context) bool {
-	result, err := a.clientService.EnforceHwidForSubID(c.Param("subid"), service.HwidRequest{
+	// Device metadata is still collected for the panel; the cap now lives on the
+	// inbound (live source IPs), so no subscription is refused here.
+	err := a.clientService.TrackHwidForSubID(c.Param("subid"), service.HwidRequest{
 		Hwid:        c.GetHeader("X-HWID"),
 		UserAgent:   c.GetHeader("User-Agent"),
 		DeviceOS:    c.GetHeader("X-Device-OS"),
@@ -726,27 +728,7 @@ func (a *SUBController) enforceHwid(c *gin.Context) bool {
 		writeSubError(c, err)
 		return false
 	}
-	applyHwidHeaders(c, result)
-	if !result.Allowed {
-		c.Status(http.StatusNotFound)
-		return false
-	}
 	return true
-}
-
-func applyHwidHeaders(c *gin.Context, result service.HwidGateResult) {
-	if result.Active {
-		c.Header("X-Hwid-Active", "true")
-	}
-	if result.NotSupported {
-		c.Header("X-Hwid-Not-Supported", "true")
-	}
-	if result.LimitReached {
-		c.Header("X-Hwid-Limit", "true")
-	}
-	if result.MaxDevicesReached {
-		c.Header("X-Hwid-Max-Devices-Reached", "true")
-	}
 }
 
 // hwidStatus serves read-only device-slot counters for a subscription. It

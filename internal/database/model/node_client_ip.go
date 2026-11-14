@@ -46,3 +46,29 @@ type NodeClientIp struct {
 	Email    string `json:"email" gorm:"uniqueIndex:idx_nodeip_guid_email,priority:2;not null"`
 	Ips      string `json:"ips"`
 }
+
+// ClientIpHistory keeps one row per client email and source IP, retaining
+// addresses after they leave the live inbound_client_ips window.
+type ClientIpHistory struct {
+	Id        int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Email     string `json:"email" gorm:"uniqueIndex:idx_client_ip_history_email_ip,priority:1;not null"`
+	IP        string `json:"ip" gorm:"size:64;uniqueIndex:idx_client_ip_history_email_ip,priority:2;not null"`
+	FirstSeen int64  `json:"firstSeen" gorm:"not null"`
+	LastSeen  int64  `json:"lastSeen" gorm:"not null;index"`
+}
+
+func (ClientIpHistory) TableName() string { return "client_ip_history" }
+
+// InboundIpRejection is one over-limit enforcement event, kept per inbound so
+// the panel can show what was blocked without parsing rotated log files.
+type InboundIpRejection struct {
+	Id        int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	InboundID int    `json:"inboundId" gorm:"column:inbound_id;not null;index"`
+	Tag       string `json:"tag" gorm:"column:tag"`
+	Email     string `json:"email" gorm:"not null;index"`
+	IP        string `json:"ip" gorm:"size:64;not null"`
+	Action    string `json:"action" gorm:"not null"`
+	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime:milli;index"`
+}
+
+func (InboundIpRejection) TableName() string { return "inbound_ip_rejections" }

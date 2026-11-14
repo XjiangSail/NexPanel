@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Divider, Modal, Popover, Tag, Tooltip, message } from 'antd';
+import { Button, Divider, Modal, Popover, Tag, Tooltip, Typography, message } from 'antd';
 import {
   CopyOutlined,
   DownloadOutlined,
@@ -11,7 +11,12 @@ import {
 
 import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import { formatInboundLabel, formatTunnelConfigMeta } from '@/lib/inbounds/label';
-import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
+import {
+  normalizeClientIpHistory,
+  normalizeClientIps,
+  type ClientIpHistoryInfo,
+  type ClientIpInfo,
+} from '@/lib/clients/ip-log';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
 import type { ClientRecord, InboundOption } from '@/hooks/useClients';
@@ -119,6 +124,7 @@ export default function ClientInfoModal({
   const [messageApi, messageContextHolder] = message.useMessage();
   const [links, setLinks] = useState<string[]>([]);
   const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
+  const [clientIpHistory, setClientIpHistory] = useState<ClientIpHistoryInfo[]>([]);
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsClearing, setIpsClearing] = useState(false);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
@@ -145,6 +151,7 @@ export default function ClientInfoModal({
     if (openSubId === null) {
       setLinks([]);
       setClientIps([]);
+      setClientIpHistory([]);
       setIpsModalOpen(false);
       resetHwids();
       setHwidsModalOpen(false);
@@ -255,14 +262,19 @@ export default function ClientInfoModal({
     if (!client?.email) return;
     setIpsLoading(true);
     try {
-      const msg = (await HttpUtil.post(
-        `/panel/api/clients/ips/${encodeURIComponent(client.email)}`,
-      )) as ApiMsg<unknown[]>;
+      const email = encodeURIComponent(client.email);
+      const [msg, historyMsg] = await Promise.all([
+        HttpUtil.post(`/panel/api/clients/ips/${email}`) as Promise<ApiMsg<unknown[]>>,
+        (
+          HttpUtil.post(`/panel/api/clients/ipHistory/${email}`) as Promise<ApiMsg<unknown[]>>
+        ).catch(() => null),
+      ]);
       if (!msg?.success) {
         setClientIps([]);
-        return;
+      } else {
+        setClientIps(normalizeClientIps(msg.obj));
       }
-      setClientIps(normalizeClientIps(msg.obj));
+      setClientIpHistory(historyMsg?.success ? normalizeClientIpHistory(historyMsg.obj) : []);
     } finally {
       setIpsLoading(false);
     }
@@ -275,7 +287,10 @@ export default function ClientInfoModal({
       const msg = (await HttpUtil.post(
         `/panel/api/clients/clearIps/${encodeURIComponent(client.email)}`,
       )) as ApiMsg;
-      if (msg?.success) setClientIps([]);
+      if (msg?.success) {
+        setClientIps([]);
+        setClientIpHistory([]);
+      }
     } finally {
       setIpsClearing(false);
     }
@@ -283,8 +298,12 @@ export default function ClientInfoModal({
 
   function openIpsModal() {
     setIpsModalOpen(true);
-    if (clientIps.length === 0) void loadIps();
+    void loadIps();
   }
+
+  const historicalIps = clientIpHistory.filter(
+    (entry) => !clientIps.some((current) => current.ip === entry.ip),
+  );
 
   function openHwidsModal() {
     setHwidsModalOpen(true);
@@ -449,21 +468,19 @@ export default function ClientInfoModal({
                   </td>
                 </tr>
                 <tr>
-                  <td>{t('pages.clients.ipLimit')}</td>
-                  <td>{!client.limitIp ? <Tag>∞</Tag> : <Tag>{client.limitIp}</Tag>}</td>
-                </tr>
-                <tr>
                   <td>{t('pages.inbounds.IPLimitlog')}</td>
                   <td>
-                    <Button
-                      size="small"
-                      icon={<EyeOutlined aria-hidden />}
-                      aria-label={t('pages.clients.ipLog')}
-                      loading={ipsLoading}
-                      onClick={openIpsModal}
-                    >
-                      {clientIps.length > 0 ? clientIps.length : ''}
-                    </Button>
+                    <Tooltip title={t('pages.clients.ipLimit')}>
+                      <Button
+                        size="small"
+                        icon={<EyeOutlined aria-hidden />}
+                        aria-label={t('pages.clients.ipLog')}
+                        loading={ipsLoading}
+                        onClick={openIpsModal}
+                      >
+                        {clientIps.length > 0 ? clientIps.length : ''}
+                      </Button>
+                    </Tooltip>
                   </td>
                 </tr>
                 {(traffic?.resetMax ?? 0) > 0 && (
@@ -480,10 +497,6 @@ export default function ClientInfoModal({
                     </td>
                   </tr>
                 )}
-                <tr>
-                  <td>{t('pages.clients.limitHwid')}</td>
-                  <td>{!client.limitHwid ? <Tag>∞</Tag> : <Tag>{client.limitHwid}</Tag>}</td>
-                </tr>
                 <tr>
                   <td>{t('pages.clients.hwidLog')}</td>
                   <td>
@@ -865,7 +878,7 @@ export default function ClientInfoModal({
             key="clear"
             danger
             loading={ipsClearing}
-            disabled={clientIps.length === 0}
+            disabled={clientIps.length === 0 && clientIpHistory.length === 0}
             onClick={clearIps}
           >
             {t('pages.clients.clearAll')}
@@ -875,33 +888,62 @@ export default function ClientInfoModal({
           </Button>,
         ]}
       >
-        {clientIps.length > 0 ? (
-          <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-            {clientIps.map((entry, idx) => (
-              <Tag
-                key={idx}
-                color="blue"
-                style={{
-                  display: 'block',
-                  width: 'fit-content',
-                  maxWidth: '100%',
-                  marginBottom: 6,
-                  padding: '2px 8px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                }}
-              >
-                {entry.ip}
-                {entry.time ? ` (${entry.time})` : ''}
-                {entry.node ? (
-                  <span style={{ marginInlineStart: 6, opacity: 0.85, fontWeight: 600 }}>
-                    @ {entry.node}
-                  </span>
-                ) : null}
-              </Tag>
-            ))}
-          </div>
-        ) : (
+        {clientIps.length === 0 && historicalIps.length === 0 ? (
           <Tag>{t('tgbot.noIpRecord')}</Tag>
+        ) : (
+          <>
+            {clientIps.length > 0 && (
+              <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                {clientIps.map((entry, idx) => (
+                  <Tag
+                    key={idx}
+                    color="blue"
+                    style={{
+                      display: 'block',
+                      width: 'fit-content',
+                      maxWidth: '100%',
+                      marginBottom: 6,
+                      padding: '2px 8px',
+                      fontFamily:
+                        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                    }}
+                  >
+                    {entry.ip}
+                    {entry.time ? ` (${entry.time})` : ''}
+                    {entry.node ? (
+                      <span style={{ marginInlineStart: 6, opacity: 0.85, fontWeight: 600 }}>
+                        @ {entry.node}
+                      </span>
+                    ) : null}
+                  </Tag>
+                ))}
+              </div>
+            )}
+            {historicalIps.length > 0 && (
+              <>
+                <Divider style={{ margin: '12px 0 8px' }}>{t('pages.clients.ipHistory')}</Divider>
+                <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                  {historicalIps.map((entry) => (
+                    <div
+                      key={entry.ip}
+                      style={{
+                        borderBottom: '1px solid var(--ant-color-border-secondary)',
+                        padding: '6px 0',
+                      }}
+                    >
+                      <Typography.Text code>{entry.ip}</Typography.Text>
+                      <div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                          {t('pages.clients.firstSeen')}: {entry.firstSeen || '-'} ·{' '}
+                          {t('pages.clients.lastSeen')}: {entry.lastSeen || '-'}
+                        </Typography.Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </Modal>
 

@@ -25,6 +25,25 @@ func normalizeSubSortIndex(v int) int {
 	return v
 }
 
+const (
+	inboundLimitActionRejectNew  = "reject_new"
+	inboundLimitActionKickOldest = "kick_oldest"
+)
+
+func normalizeInboundLimit(inbound *model.Inbound) {
+	if inbound == nil {
+		return
+	}
+	if inbound.LimitIP < 0 {
+		inbound.LimitIP = 0
+	}
+	switch inbound.LimitAction {
+	case inboundLimitActionKickOldest:
+	default:
+		inbound.LimitAction = inboundLimitActionRejectNew
+	}
+}
+
 // uniqueNonEmptyStrings returns a deduplicated copy of in with empty strings
 // removed, preserving the order of first occurrence.
 func uniqueNonEmptyStrings(in []string) []string {

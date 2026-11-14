@@ -8,6 +8,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -202,12 +203,21 @@ func (s *InboundService) UpdateClientIPs(tx *gorm.DB, oldEmail string, newEmail 
 		if err := tx.Where("client_email = ?", newEmail).Delete(model.InboundClientIps{}).Error; err != nil {
 			return err
 		}
+		if err := tx.Where("email = ?", newEmail).Delete(&model.ClientIpHistory{}).Error; err != nil {
+			return err
+		}
 	}
-	return tx.Model(model.InboundClientIps{}).Where("client_email = ?", oldEmail).Update("client_email", newEmail).Error
+	if err := tx.Model(model.InboundClientIps{}).Where("client_email = ?", oldEmail).Update("client_email", newEmail).Error; err != nil {
+		return err
+	}
+	return tx.Model(&model.ClientIpHistory{}).Where("email = ?", oldEmail).Update("email", newEmail).Error
 }
 
 func (s *InboundService) DelClientIPs(tx *gorm.DB, email string) error {
-	return tx.Where("client_email = ?", email).Delete(model.InboundClientIps{}).Error
+	if err := tx.Where("client_email = ?", email).Delete(model.InboundClientIps{}).Error; err != nil {
+		return err
+	}
+	return tx.Where("email = ?", email).Delete(&model.ClientIpHistory{}).Error
 }
 
 func (s *InboundService) delClientIPsByEmails(tx *gorm.DB, emails []string) error {
@@ -215,6 +225,9 @@ func (s *InboundService) delClientIPsByEmails(tx *gorm.DB, emails []string) erro
 	for start := 0; start < len(emails); start += chunk {
 		end := min(start+chunk, len(emails))
 		if err := tx.Where("client_email IN ?", emails[start:end]).Delete(model.InboundClientIps{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("email IN ?", emails[start:end]).Delete(&model.ClientIpHistory{}).Error; err != nil {
 			return err
 		}
 	}
@@ -262,14 +275,12 @@ func (s *InboundService) GetInboundClientIps(clientEmail string) (string, error)
 func (s *InboundService) ClearClientIps(clientEmail string) error {
 	db := database.GetDB()
 
-	result := db.Model(model.InboundClientIps{}).
+	if err := db.Model(model.InboundClientIps{}).
 		Where("client_email = ?", clientEmail).
-		Update("ips", "")
-	err := result.Error
-	if err != nil {
+		Update("ips", "").Error; err != nil {
 		return err
 	}
-	return nil
+	return s.ClearClientIpHistory(clientEmail)
 }
 
 // PruneStaleClientIps enforces clientIpStaleAfterSeconds for rows the online
@@ -347,7 +358,13 @@ func (s *InboundService) MergeNodeClientIps(nodeID int, rows []model.InboundClie
 	if len(kept) == 0 {
 		return nil
 	}
-	return s.MergeInboundClientIps(kept)
+	if err := s.MergeInboundClientIps(kept); err != nil {
+		return err
+	}
+	if err := s.RecordClientIpHistory(clientIpHistoryFromRows(kept)); err != nil {
+		logger.Debug("record client ip history from node failed:", err)
+	}
+	return nil
 }
 
 // clampClientIpEntries caps reported timestamps at now: a future-dated entry would never

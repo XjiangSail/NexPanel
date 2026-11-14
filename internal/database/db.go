@@ -68,6 +68,8 @@ func allModels() []any {
 		&model.OutboundTraffics{},
 		&model.Setting{},
 		&model.InboundClientIps{},
+		&model.ClientIpHistory{},
+		&model.InboundIpRejection{},
 		&xray.ClientTraffic{},
 		&model.HistoryOfSeeders{},
 		&model.Node{},
@@ -106,6 +108,26 @@ func migrateOutboundSubscriptionUserAgentColumn() error {
 	return migrator.AddColumn(&model.OutboundSubscription{}, "UserAgent")
 }
 
+func migrateInboundLimitColumns() error {
+	migrator := db.Migrator()
+	if !migrator.HasTable(&model.Inbound{}) {
+		return nil
+	}
+	if !migrator.HasColumn(&model.Inbound{}, "limit_ip") {
+		if err := migrator.AddColumn(&model.Inbound{}, "LimitIP"); err != nil {
+			return err
+		}
+	}
+	if !migrator.HasColumn(&model.Inbound{}, "limit_action") {
+		if err := migrator.AddColumn(&model.Inbound{}, "LimitAction"); err != nil {
+			return err
+		}
+	}
+	return db.Model(&model.Inbound{}).
+		Where("limit_action IS NULL OR limit_action = ''").
+		Update("limit_action", "reject_new").Error
+}
+
 func migrateInboundExcludeFromSubColumn() error {
 	migrator := db.Migrator()
 	if !migrator.HasTable(&model.Inbound{}) || migrator.HasColumn(&model.Inbound{}, "exclude_from_sub") {
@@ -133,6 +155,9 @@ func initModels() error {
 		return err
 	}
 	if err := migrateInboundExcludeFromSubColumn(); err != nil {
+		return err
+	}
+	if err := migrateInboundLimitColumns(); err != nil {
 		return err
 	}
 	models := allModels()

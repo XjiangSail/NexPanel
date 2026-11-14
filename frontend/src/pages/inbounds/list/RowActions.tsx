@@ -12,6 +12,7 @@ import {
   TagsOutlined,
   UsergroupAddOutlined,
   UsergroupDeleteOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 
 import { isInboundMultiUser } from './helpers';
@@ -66,6 +67,11 @@ export function buildRowActionsMenu({
     key: 'clipboard',
     icon: <CopyOutlined aria-hidden />,
     label: t('pages.inbounds.exportInbound'),
+  });
+  items.push({
+    key: 'limitAudit',
+    icon: <SafetyCertificateOutlined aria-hidden />,
+    label: t('pages.inbounds.limitAudit.title'),
   });
   items.push({
     key: 'resetTraffic',

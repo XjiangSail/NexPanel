@@ -81,6 +81,7 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.GET("/options", a.getInboundOptions)
 	g.GET("/allLinks", a.getAllInboundLinks)
 	g.GET("/get/:id", a.getInbound)
+	g.GET("/:id/limitAudit", a.getInboundLimitAudit)
 	g.GET("/:id/fallbacks", a.getFallbacks)
 	g.GET("/amneziawgKernelReadiness", a.getAmneziaWGKernelReadiness)
 
@@ -166,6 +167,17 @@ func (a *InboundController) getInbound(c *gin.Context) {
 		return
 	}
 	jsonObj(c, inbound, nil)
+}
+
+// getInboundLimitAudit returns the node-level IP/device/history/rejection view.
+func (a *InboundController) getInboundLimitAudit(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	audit, err := a.inboundService.GetInboundLimitAudit(id)
+	jsonObj(c, audit, err)
 }
 
 // addInbound creates a new inbound configuration.

@@ -35,6 +35,9 @@ export const InboundCoreSchema = z.object({
   tag: z.string().default(''),
   shareAddrStrategy: z.enum(['node', 'listen', 'custom']).default('node'),
   shareAddr: z.string().default(''),
+  limitIp: z.number().int().min(0).default(0),
+  limitAction: z.enum(['reject_new', 'kick_oldest']).default('reject_new'),
+  onlineIpCount: z.number().int().min(0).default(0),
   sniffing: SniffingSchema.default({
     enabled: false,
     destOverride: ['http', 'tls', 'quic', 'fakedns'],

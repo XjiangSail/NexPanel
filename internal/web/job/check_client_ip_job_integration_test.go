@@ -51,17 +51,22 @@ func setupIntegrationDB(t *testing.T) {
 	dbtest.InitDB(t, filepath.Join(dbDir, "x-ui.db"))
 }
 
-// enforceIpLimitForTest runs the same two steps processObserved does: select
-// inside the transaction, publish only once it would have committed.
+// enforceIpLimitForTest mirrors processObserved: collect first, then publish the
+// inbound-level verdict after the write.
 func (j *CheckClientIpJob) enforceIpLimitForTest(t *testing.T, row *model.InboundClientIps, inbound *model.Inbound, email string, limit int, live []model.ClientIpEntry, observedAreLive bool) (banned bool, published []model.ClientIpEntry) {
 	t.Helper()
-	candidates, keptLive := j.updateInboundClientIps(database.GetDB(), row, inbound, email, limit, live, true, observedAreLive)
-	actionable := j.selectAdvancedSinceLastBan(email, candidates)
-	done := j.publishBans([]pendingBan{{inbound: inbound, email: email, candidates: candidates, keptLive: keptLive}})
-	if len(done) == 0 {
-		return false, nil
+	inbound.LimitIP = limit
+	j.updateInboundClientIps(database.GetDB(), row, inbound, email, live, observedAreLive)
+
+	observed := map[string]map[string]int64{email: {}}
+	for _, entry := range live {
+		observed[email][entry.IP] = entry.Timestamp
 	}
-	return true, actionable
+	done := j.publishBans(j.inboundLimitBans(observed, map[string][]*model.Inbound{email: {inbound}}))
+	for _, ban := range done {
+		published = append(published, ban.candidates...)
+	}
+	return len(done) > 0, published
 }
 
 // seed an inbound whose settings json has a single client with the
@@ -87,11 +92,13 @@ func seedInboundOnlyWithClient(t *testing.T, tag, email string, limitIp int) *mo
 		t.Fatalf("marshal settings: %v", err)
 	}
 	inbound := &model.Inbound{
-		Tag:      tag,
-		Enable:   true,
-		Protocol: model.VLESS,
-		Port:     4321,
-		Settings: string(settingsJSON),
+		Tag:         tag,
+		Enable:      true,
+		Protocol:    model.VLESS,
+		Port:        4321,
+		Settings:    string(settingsJSON),
+		LimitIP:     limitIp,
+		LimitAction: "kick_oldest",
 	}
 	if err := database.GetDB().Create(inbound).Error; err != nil {
 		t.Fatalf("seed inbound: %v", err)
@@ -275,12 +282,12 @@ func TestUpdateInboundClientIps_ExcessLiveIpIsStillBanned(t *testing.T) {
 		t.Fatalf("expected 10.1.0.1 to be banned; published = %v", published)
 	}
 
+	// The display blob keeps every recently seen address; only enforcement drops it.
 	persisted := ipSet(readClientIps(t, email))
-	if _, ok := persisted["192.0.2.9"]; !ok {
-		t.Errorf("newest IP 192.0.2.9 must still be persisted; got %v", persisted)
-	}
-	if _, ok := persisted["10.1.0.1"]; ok {
-		t.Errorf("banned IP 10.1.0.1 must NOT be persisted; got %v", persisted)
+	for _, ip := range []string{"192.0.2.9", "10.1.0.1"} {
+		if _, ok := persisted[ip]; !ok {
+			t.Errorf("%s must still be persisted in the IP log; got %v", ip, persisted)
+		}
 	}
 
 	// 3xipl.log must contain the ban line in the exact fail2ban format.
@@ -457,28 +464,32 @@ func TestGetInboundByEmailRejectsSubstringFallbackMatch(t *testing.T) {
 	}
 }
 
-// hasLimitIp gates every 10s scan on the normalized clients table: a bare
-// "limitIp":0 in settings JSON (which the old LIKE scan matched and parsed)
-// must not enable enforcement, while a single clients.limit_ip > 0 row must.
-func TestHasLimitIp_ProbesClientRecords(t *testing.T) {
+// hasInboundLimitIp gates every 10s scan on locally hosted inbounds. A client's
+// own limit_ip no longer enables enforcement, and a remote inbound is the node's job.
+func TestHasInboundLimitIp_ProbesInboundRows(t *testing.T) {
 	setupIntegrationDB(t)
 	j := &CheckClientIpJob{}
 
-	if j.hasLimitIp() {
-		t.Fatal("hasLimitIp = true on an empty database")
+	if j.hasInboundLimitIp() {
+		t.Fatal("hasInboundLimitIp = true on an empty database")
 	}
 
 	seedLinkedInboundWithClient(t, "no-limit", "nolimit@example.com", 0)
-	if j.hasLimitIp() {
-		t.Fatal("hasLimitIp = true with only limit_ip=0 clients")
+	if j.hasInboundLimitIp() {
+		t.Fatal("hasInboundLimitIp = true with only limit_ip=0 inbounds")
 	}
 
-	limited := &model.ClientRecord{Email: "limited@example.com", LimitIP: 2}
-	if err := database.GetDB().Create(limited).Error; err != nil {
-		t.Fatalf("seed limited client: %v", err)
+	limited := seedLinkedInboundWithClient(t, "limited", "limited@example.com", 2)
+	if !j.hasInboundLimitIp() {
+		t.Fatal("hasInboundLimitIp = false with a limit_ip=2 inbound present")
 	}
-	if !j.hasLimitIp() {
-		t.Fatal("hasLimitIp = false with a limit_ip=2 client present")
+
+	if err := database.GetDB().Model(&model.Inbound{}).Where("id = ?", limited.Id).
+		Update("node_id", 7).Error; err != nil {
+		t.Fatalf("move inbound to a node: %v", err)
+	}
+	if j.hasInboundLimitIp() {
+		t.Fatal("a remote inbound must be enforced by its node, not this panel")
 	}
 }
 

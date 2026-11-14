@@ -155,7 +155,7 @@
       "xrayUpdates": "به‌روزرسانی‌های Xray",
       "xraySwitchClickDesk": "لطفا بادقت انتخاب کنید. درصورت انتخاب نسخه قدیمی‌تر، امکان ناهماهنگی با پیکربندی فعلی وجود دارد",
       "updatePanel": "به‌روزرسانی پنل",
-      "panelUpdateDesc": "این عملیات 3X-UI را به آخرین نسخه به‌روزرسانی می‌کند و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
+      "panelUpdateDesc": "این عملیات NexPanel را به آخرین نسخه به‌روزرسانی می‌کند و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
       "currentPanelVersion": "نسخه فعلی پنل",
       "latestPanelVersion": "آخرین نسخه پنل",
       "panelUpToDate": "پنل به‌روز است",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "این کار نسخه Xray را به #version# تغییر می‌دهد.",
       "xraySwitchVersionPopover": "Xray با موفقیت به‌روز شد",
       "panelUpdateDialog": "آیا مطمئن هستید که می‌خواهید پنل را به‌روزرسانی کنید؟",
-      "panelUpdateDialogDesc": "این 3X-UI را به نسخه #version# به‌روزرسانی کرده و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
+      "panelUpdateDialogDesc": "این NexPanel را به نسخه #version# به‌روزرسانی کرده و سرویس پنل را مجدداً راه‌اندازی می‌کند.",
       "panelUpdateStartedPopover": "به‌روزرسانی پنل آغاز شد",
       "panelUpdateFailedTitle": "به‌روزرسانی پنل ناموفق بود",
       "panelUpdateFailedDesc": "به‌روزرسانی با موفقیت به پایان نرسید. گزارش‌های سرور را بررسی کنید یا دستور «x-ui update» را از خط فرمان اجرا کنید.",
@@ -397,6 +397,25 @@
       "IPLimit": "محدودیت آی‌پی",
       "IPLimitlog": "گزارش‌ها",
       "IPLimitlogclear": "پاک کردن گزارش‌ها",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "استفاده از گواهی پنل",
       "setDefaultCertEmpty": "هیچ گواهی‌ای برای پنل پیکربندی نشده. ابتدا از تنظیمات یکی تعیین کنید.",
       "streamTab": "انتقال",
@@ -728,6 +747,14 @@
         "excludeFromSubHelp": "لینک‌های این ورودی را از خروجی اشتراک پنهان می‌کند، در حالی که ورودی همچنان فعال و عملیاتی می‌ماند.",
         "disableFlow": "غیرفعال‌کردن جریان XTLS",
         "disableFlowHelp": "این inbound را از تزریق خودکار xtls-rprx-vision کنار بگذارید، حتی وقتی ترنسپورت آن از flow پشتیبانی می‌کند (مثلاً یک inbound از نوع XHTTP تونل‌شده با رمزنگاری VLESS). کلاینت‌ها Vision را روی سایر inboundهای سازگار در همان اشتراک حفظ می‌کنند. فقط برای VLESS.",
+        "ipLimit": "حد IP هم‌زمان",
+        "ipLimitHelp": "حداکثر IPهای مبدأ یکتای هم‌زمان روی این ورودی. ۰ = نامحدود. کلاینتی که به چند ورودی وصل است در هر یک شمرده می‌شود.",
+        "ipLimitAction": "اقدام هنگام عبور از حد",
+        "ipLimitActionHelp": "رد جدید: قدیمی‌ترین‌ها می‌مانند و جدیدترین‌ها مسدود می‌شوند؛ حذف قدیمی: جدیدترین‌ها می‌مانند و قدیمی‌ترین‌ها مسدود می‌شوند.",
+        "ipLimitActionOptions": {
+          "reject_new": "رد جدید",
+          "kick_oldest": "حذف قدیمی‌ترین"
+        },
         "shareAddrStrategyOptions": {
           "node": "آدرس نود",
           "listen": "آدرس شنود ورودی",
@@ -824,6 +851,7 @@
       "first": "اول",
       "last": "آخر",
       "ipLog": "گزارش IP",
+      "ipHistory": "تاریخچه IP",
       "prefix": "پیشوند",
       "postfix": "پسوند",
       "delayedStart": "شروع پس از اولین استفاده",
@@ -855,10 +883,6 @@
       "totalGBDesc": "سهمیه‌ی حجم مصرفی کلاینت. ۰ = نامحدود",
       "expiryTime": "انقضا",
       "addClients": "افزودن کلاینت‌ها",
-      "limitIp": "محدودیت IP",
-      "limitIpDesc": "حداکثر تعداد IP همزمان. ۰ = نامحدود",
-      "limitHwid": "محدودیت HWID",
-      "limitHwidDesc": "حداکثر دستگاه ثبت‌شده برای درخواست‌های اشتراک. ۰ = نامحدود",
       "hwidLog": "دستگاه‌های HWID",
       "hwidDevice": "دستگاه ثبت‌شده",
       "noHwids": "هنوز دستگاه HWID ثبت نشده است",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "اسپانسرها",
-      "intro": "شرکت‌هایی که از توسعه‌ی 3X-UI حمایت می‌کنند. لینک‌های اسپانسر در تب جدید باز می‌شوند.",
+      "intro": "شرکت‌هایی که از توسعه‌ی NexPanel حمایت می‌کنند. لینک‌های اسپانسر در تب جدید باز می‌شوند.",
       "become": "اسپانسر شوید",
       "tag": "اسپانسر",
       "visit": "مشاهده",
       "yourBrand": "جای برند شما",
-      "yourBrandText": "شرکت خود را جلوی چشم هزاران ادمین سروری بگذارید که هر روز 3X-UI را باز می‌کنند."
+      "yourBrandText": "شرکت خود را جلوی چشم هزاران ادمین سروری بگذارید که هر روز NexPanel را باز می‌کنند."
     }
   },
   "tgbot": {
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "آزمایش اعلان دیسکورد 3x-ui",
+      "title": "آزمایش اعلان دیسکورد NexPanel",
       "body": "این یک اعلان آزمایشی است که تأیید می‌کند اعلان‌های دیسکورد به‌درستی پیکربندی شده‌اند."
     },
-    "footer": "پنل 3x-ui",
+    "footer": "پنل NexPanel",
     "fields": {
       "panelVersion": "نسخه پنل",
       "xrayCore": "هسته Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "ورود ناموفق"
     },
     "report": {
-      "title": "📊 گزارش وضعیت 3x-ui",
+      "title": "📊 گزارش وضعیت NexPanel",
       "summary": "گزارش دوره‌ای وضعیت سرور و پراکسی برای **{{ .Host }}**",
-      "footer": "گزارش زمان‌بندی‌شده 3x-ui • زمان‌بندی: {{ .RunTime }}"
+      "footer": "گزارش زمان‌بندی‌شده NexPanel • زمان‌بندی: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 دستورات ربات دیسکورد 3x-ui",
-      "helpDescription": "دستورات موجود برای پایش و مدیریت سرور 3x-ui:",
+      "helpTitle": "🤖 دستورات ربات دیسکورد NexPanel",
+      "helpDescription": "دستورات موجود برای پایش و مدیریت سرور NexPanel:",
       "helpStatus": "نمایش بار سیستم، رم، پردازنده، اتصالات و کاربران آنلاین",
       "helpReport": "ایجاد گزارش کامل وضعیت (همراه پشتیبان پایگاه داده در صورت فعال بودن)",
       "helpBackup": "ارسال فوری فایل پشتیبان پایگاه داده",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "فهرست همه ورودی‌های پیکربندی‌شده همراه پورت‌ها و آمار کاربران",
       "helpRestart": "راه‌اندازی مجدد هسته Xray",
       "helpHelp": "نمایش همین فهرست دستورات",
-      "statusTitle": "⚡ وضعیت سرور 3x-ui",
+      "statusTitle": "⚡ وضعیت سرور NexPanel",
       "statusDescription": "شاخص‌های عملکرد فعلی **{{ .Host }}**",
       "backupTitle": "🗄️ پشتیبان پایگاه داده",
-      "backupDescription": "آرشیو پشتیبان 3x-ui ایجادشده در `{{ .Time }}`",
+      "backupDescription": "آرشیو پشتیبان NexPanel ایجادشده در `{{ .Time }}`",
       "backupUnavailable": "❌ سرویس پشتیبان‌گیری در دسترس نیست",
       "backupFailed": "❌ خواندن پشتیبان پایگاه داده ناموفق بود: {{ .Error }}",
       "usageHint": "⚠️ نحوه استفاده: `!usage <email>` یا `/usage <email>`",

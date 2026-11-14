@@ -143,12 +143,14 @@ func seedScaleIPDataset(t *testing.T, n, numInbounds int) []string {
 			t.Fatalf("marshal settings: %v", err)
 		}
 		ib := &model.Inbound{
-			UserId:   1,
-			Tag:      fmt.Sprintf("ipscale-%d-%d", n, i),
-			Enable:   true,
-			Port:     42000 + i,
-			Protocol: model.VLESS,
-			Settings: string(settings),
+			UserId:      1,
+			Tag:         fmt.Sprintf("ipscale-%d-%d", n, i),
+			Enable:      true,
+			Port:        42000 + i,
+			Protocol:    model.VLESS,
+			Settings:    string(settings),
+			LimitIP:     limitIp,
+			LimitAction: "kick_oldest",
 		}
 		if err := tx.Create(ib).Error; err != nil {
 			t.Fatalf("seed inbound %d: %v", i, err)
@@ -192,11 +194,11 @@ func TestCheckClientIpScale(t *testing.T) {
 				const reps = 3
 				start := time.Now()
 				for range reps {
-					if !j.hasLimitIp() {
-						t.Fatal("hasLimitIp = false, want true")
+					if !j.hasInboundLimitIp() {
+						t.Fatal("hasInboundLimitIp = false, want true")
 					}
 				}
-				t.Logf("N=%-7d shape=%-8s hasLimitIp=%v/call", n, shape.name, (time.Since(start) / reps).Round(time.Millisecond))
+				t.Logf("N=%-7d shape=%-8s hasInboundLimitIp=%v/call", n, shape.name, (time.Since(start) / reps).Round(time.Millisecond))
 
 				now := time.Now().Unix()
 				observed := make(map[string]map[string]int64, m)

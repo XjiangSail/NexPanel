@@ -85,7 +85,7 @@ func TestProcessObserved_CommitFailureDoesNotPublishBan(t *testing.T) {
 	setupIntegrationDB(t)
 
 	const email = "rollback-must-not-ban@x"
-	seedLinkedInboundWithClient(t, "rollback-must-not-ban", email, 1)
+	inbound := seedLinkedInboundWithClient(t, "rollback-must-not-ban", email, 1)
 	now := time.Now().Unix()
 	seedClientIps(t, email, []model.ClientIpEntry{{IP: "198.51.100.10", Timestamp: now - 2}})
 
@@ -108,7 +108,7 @@ func TestProcessObserved_CommitFailureDoesNotPublishBan(t *testing.T) {
 		body, _ := os.ReadFile(readIpLimitLogPath())
 		t.Errorf("the rollback still touched the fail2ban trigger file (stat=%v):\n%s", err, body)
 	}
-	if _, seen := j.bannedSeen[email+"|198.51.100.10"]; seen {
+	if _, seen := j.bannedSeen[banKey(inbound.Id, email, "198.51.100.10")]; seen {
 		t.Errorf("the rollback advanced bannedSeen and would suppress the retry")
 	}
 }
@@ -194,7 +194,7 @@ func TestProcessObserved_PublishesBanForCommittedScan(t *testing.T) {
 	setupIntegrationDB(t)
 
 	const email = "published-ban@x"
-	seedLinkedInboundWithClient(t, "published-ban", email, 1)
+	inbound := seedLinkedInboundWithClient(t, "published-ban", email, 1)
 	now := time.Now().Unix()
 	seedClientIps(t, email, []model.ClientIpEntry{{IP: "203.0.113.50", Timestamp: now - 500}})
 
@@ -207,7 +207,7 @@ func TestProcessObserved_PublishesBanForCommittedScan(t *testing.T) {
 	if got := banLineCount(t, email); got != 1 {
 		t.Fatalf("ban lines = %d, want 1", got)
 	}
-	if _, seen := j.bannedSeen[email+"|203.0.113.50"]; !seen {
+	if _, seen := j.bannedSeen[banKey(inbound.Id, email, "203.0.113.50")]; !seen {
 		t.Fatalf("a published address must be recorded so the next scan does not repeat it")
 	}
 }

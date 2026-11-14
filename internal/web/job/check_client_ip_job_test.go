@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
@@ -110,88 +109,87 @@ func TestMergeClientIps_LiveModeStillEvictsStaleOldEntries(t *testing.T) {
 	}
 }
 
-func TestSelectIpsToBan(t *testing.T) {
-	live := []model.ClientIpEntry{ // sorted oldest-first, as partitionLiveIps returns
-		{IP: "A", Timestamp: 100},
-		{IP: "B", Timestamp: 200},
-		{IP: "C", Timestamp: 300},
+func TestInboundLimitBansKickOldest(t *testing.T) {
+	inbound := &model.Inbound{Id: 1, Tag: "in-a", LimitIP: 1, LimitAction: "kick_oldest"}
+	attached := map[string][]*model.Inbound{
+		"a@example.test": {inbound},
+		"b@example.test": {inbound},
+	}
+	observed := map[string]map[string]int64{
+		"a@example.test": {"1.1.1.1": 100, "2.2.2.2": 300},
+		"b@example.test": {"1.1.1.1": 150},
 	}
 
-	// over the limit: oldest connections are banned, newest keep the slots
-	kept, banned := selectIpsToBan(live, 1)
-	if got := collectIps(kept); !reflect.DeepEqual(got, []string{"C"}) {
-		t.Fatalf("newest ip must keep the slot, got %v", got)
-	}
-	if got := collectIps(banned); !reflect.DeepEqual(got, []string{"A", "B"}) {
-		t.Fatalf("older ips must be banned oldest-first, got %v", got)
-	}
+	bans := (&CheckClientIpJob{}).inboundLimitBans(observed, attached)
 
-	// at the limit: nothing banned
-	kept, banned = selectIpsToBan(live, 3)
-	if len(banned) != 0 || len(kept) != 3 {
-		t.Fatalf("at-limit set must not ban, kept=%v banned=%v", kept, banned)
+	if len(bans) != 2 {
+		t.Fatalf("bans = %d, want one per email using the oldest IP", len(bans))
 	}
-
-	// under the limit: nothing banned
-	kept, banned = selectIpsToBan(live[:1], 3)
-	if len(banned) != 0 || len(kept) != 1 {
-		t.Fatalf("under-limit set must not ban, kept=%v banned=%v", kept, banned)
-	}
-
-	// defensive: non-positive limit never reaches enforcement, but must not panic
-	if _, banned := selectIpsToBan(live, 0); banned != nil {
-		t.Fatalf("zero limit must not ban, got %v", banned)
+	for _, ban := range bans {
+		if len(ban.candidates) != 1 || ban.candidates[0].IP != "1.1.1.1" {
+			t.Fatalf("banned candidates = %+v, want 1.1.1.1", ban.candidates)
+		}
+		if ban.keptLive != 1 {
+			t.Fatalf("keptLive = %d, want 1", ban.keptLive)
+		}
 	}
 }
 
-func collectIps(entries []model.ClientIpEntry) []string {
-	out := make([]string, 0, len(entries))
-	for _, e := range entries {
-		out = append(out, e.IP)
+func TestInboundLimitBansRejectNewKeepsOldest(t *testing.T) {
+	inbound := &model.Inbound{Id: 2, Tag: "in-b", LimitIP: 1, LimitAction: "reject_new"}
+	attached := map[string][]*model.Inbound{"a@example.test": {inbound}}
+	observed := map[string]map[string]int64{
+		"a@example.test": {"1.1.1.1": 100, "2.2.2.2": 300},
 	}
-	return out
-}
 
-func TestPartitionLiveIps_SingleLiveNotStarvedByStillFreshHistoricals(t *testing.T) {
-	// #4091: db holds A, B, C from minutes ago (still in the 30min
-	// window) but they're not connecting anymore. only D is. old code
-	// merged all four, sorted ascending, kept [A,B,C] and banned D
-	// every tick. pin the new rule: only live ips count toward the limit.
-	ipMap := map[string]int64{
-		"A": 1000,
-		"B": 1100,
-		"C": 1200,
-		"D": 2000,
-	}
-	observed := map[string]bool{"D": true}
+	bans := (&CheckClientIpJob{}).inboundLimitBans(observed, attached)
 
-	live, historical := partitionLiveIps(ipMap, observed)
-
-	if got := collectIps(live); !reflect.DeepEqual(got, []string{"D"}) {
-		t.Fatalf("live set should only contain the ip observed this scan\ngot:  %v\nwant: [D]", got)
-	}
-	if got := collectIps(historical); !reflect.DeepEqual(got, []string{"A", "B", "C"}) {
-		t.Fatalf("historical set should contain db-only ips in ascending order\ngot:  %v\nwant: [A B C]", got)
+	if len(bans) != 1 || bans[0].candidates[0].IP != "2.2.2.2" {
+		t.Fatalf("bans = %+v, want the newest IP rejected", bans)
 	}
 }
 
-func TestPartitionLiveIps_ConcurrentLiveIpsSortedAscending(t *testing.T) {
-	// when several ips are really live, partition returns them all in the
-	// live set sorted ascending by timestamp. updateInboundClientIps then
-	// keeps the newest and bans the oldest (last-IP-wins, #4699).
-	ipMap := map[string]int64{
-		"A": 5000,
-		"B": 5500,
+func TestInboundLimitBansCountsSharedIpOnce(t *testing.T) {
+	inbound := &model.Inbound{Id: 3, Tag: "in-c", LimitIP: 1, LimitAction: "kick_oldest"}
+	attached := map[string][]*model.Inbound{
+		"a@example.test": {inbound},
+		"b@example.test": {inbound},
 	}
-	observed := map[string]bool{"A": true, "B": true}
-
-	live, historical := partitionLiveIps(ipMap, observed)
-
-	if got := collectIps(live); !reflect.DeepEqual(got, []string{"A", "B"}) {
-		t.Fatalf("both live ips should be in the live set, ascending\ngot:  %v\nwant: [A B]", got)
+	observed := map[string]map[string]int64{
+		"a@example.test": {"9.9.9.9": 100},
+		"b@example.test": {"9.9.9.9": 200},
 	}
-	if len(historical) != 0 {
-		t.Fatalf("no historical ips expected, got %v", historical)
+
+	if bans := (&CheckClientIpJob{}).inboundLimitBans(observed, attached); len(bans) != 0 {
+		t.Fatalf("a shared IP must occupy one slot, got bans %+v", bans)
+	}
+}
+
+func TestInboundLimitBansApplyPerInbound(t *testing.T) {
+	first := &model.Inbound{Id: 4, Tag: "in-1", LimitIP: 1, LimitAction: "kick_oldest"}
+	second := &model.Inbound{Id: 5, Tag: "in-2", LimitIP: 5, LimitAction: "kick_oldest"}
+	attached := map[string][]*model.Inbound{"a@example.test": {first, second}}
+	observed := map[string]map[string]int64{
+		"a@example.test": {"1.1.1.1": 100, "2.2.2.2": 300},
+	}
+
+	bans := (&CheckClientIpJob{}).inboundLimitBans(observed, attached)
+
+	if len(bans) != 1 || bans[0].inbound.Id != first.Id {
+		t.Fatalf("bans = %+v, want only the strict inbound to ban", bans)
+	}
+}
+
+func TestInboundLimitBansRespectsAllowlist(t *testing.T) {
+	inbound := &model.Inbound{Id: 6, Tag: "in-allow", LimitIP: 1, LimitAction: "kick_oldest"}
+	job := &CheckClientIpJob{allowlist: parseIpLimitAllowlist("1.1.1.1")}
+	attached := map[string][]*model.Inbound{"a@example.test": {inbound}}
+	observed := map[string]map[string]int64{
+		"a@example.test": {"1.1.1.1": 100, "2.2.2.2": 300},
+	}
+
+	if bans := job.inboundLimitBans(observed, attached); len(bans) != 0 {
+		t.Fatalf("an allowlisted IP must not consume a slot, got %+v", bans)
 	}
 }
 
@@ -226,45 +224,6 @@ func TestGetInboundByEmailFallbackIgnoresProtocolScalarFields(t *testing.T) {
 	}
 }
 
-func TestPartitionLiveIps_EmptyScanLeavesDbIntact(t *testing.T) {
-	// quiet tick: nothing observed => nothing live. everything merged
-	// is historical. keeps the panel from wiping recent-but-idle ips.
-	ipMap := map[string]int64{
-		"A": 1000,
-		"B": 1100,
-	}
-	observed := map[string]bool{}
-
-	live, historical := partitionLiveIps(ipMap, observed)
-
-	if len(live) != 0 {
-		t.Fatalf("no live ips expected, got %v", live)
-	}
-	if got := collectIps(historical); !reflect.DeepEqual(got, []string{"A", "B"}) {
-		t.Fatalf("all merged entries should flow to historical\ngot:  %v\nwant: [A B]", got)
-	}
-}
-
-func TestPartitionLiveIps_RecentSyncedIpIsLive(t *testing.T) {
-	// Synced IPs from other nodes within 2 minutes should be counted as live
-	// even if they weren't observed in the local scan.
-	now := time.Now().Unix()
-	ipMap := map[string]int64{
-		"A": now - 30,  // synced 30s ago -> live
-		"B": now - 150, // synced 2m30s ago -> historical
-	}
-	observed := map[string]bool{}
-
-	live, historical := partitionLiveIps(ipMap, observed)
-
-	if got := collectIps(live); !reflect.DeepEqual(got, []string{"A"}) {
-		t.Fatalf("recent IP should be live\ngot:  %v\nwant: [A]", got)
-	}
-	if got := collectIps(historical); !reflect.DeepEqual(got, []string{"B"}) {
-		t.Fatalf("older IP should be historical\ngot:  %v\nwant: [B]", got)
-	}
-}
-
 func TestCheckFail2BanInstalled_DisabledEnvSkipsClientProbe(t *testing.T) {
 	t.Setenv("XUI_ENABLE_FAIL2BAN", "false")
 	marker := fakeFail2BanClient(t)
@@ -286,30 +245,6 @@ func TestCheckFail2BanInstalled_EmptyEnvSkipsClientProbe(t *testing.T) {
 	}
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
 		t.Fatalf("fail2ban-client should not have been executed, stat error: %v", err)
-	}
-}
-
-// Map-iteration order must not reach the blob: an unchanged client would CAS-rewrite
-// every 10s, and the ban pick among tied IPs would be random per scan.
-func TestPartitionLiveIps_TiedTimestampsKeepStableIpOrder(t *testing.T) {
-	ipMap := map[string]int64{"203.0.113.3": 100, "203.0.113.1": 100, "203.0.113.2": 100}
-	observed := map[string]bool{"203.0.113.1": true, "203.0.113.2": true, "203.0.113.3": true}
-	var first []model.ClientIpEntry
-	for i := range 50 {
-		live, _ := partitionLiveIps(ipMap, observed)
-		if i == 0 {
-			first = live
-			continue
-		}
-		if !reflect.DeepEqual(first, live) {
-			t.Fatalf("tied timestamps produced different orders across runs: %v vs %v", first, live)
-		}
-	}
-	want := []string{"203.0.113.1", "203.0.113.2", "203.0.113.3"}
-	for i, ip := range want {
-		if first[i].IP != ip {
-			t.Fatalf("tied timestamps must order by IP, got %v", first)
-		}
 	}
 }
 

@@ -155,7 +155,7 @@
       "xrayUpdates": "Cập nhật Xray",
       "xraySwitchClickDesk": "Hãy lựa chọn thận trọng, vì các phiên bản cũ có thể không tương thích với các cấu hình hiện tại.",
       "updatePanel": "Cập nhật Panel",
-      "panelUpdateDesc": "Điều này sẽ cập nhật 3X-UI lên bản phát hành mới nhất và khởi động lại dịch vụ panel.",
+      "panelUpdateDesc": "Điều này sẽ cập nhật NexPanel lên bản phát hành mới nhất và khởi động lại dịch vụ panel.",
       "currentPanelVersion": "Phiên bản panel hiện tại",
       "latestPanelVersion": "Phiên bản panel mới nhất",
       "panelUpToDate": "Panel đã được cập nhật",
@@ -219,7 +219,7 @@
       "xraySwitchVersionDialogDesc": "Hành động này sẽ thay đổi phiên bản Xray thành #version#.",
       "xraySwitchVersionPopover": "Xray đã được cập nhật thành công",
       "panelUpdateDialog": "Bạn có chắc muốn cập nhật panel không?",
-      "panelUpdateDialogDesc": "Điều này sẽ cập nhật 3X-UI lên #version# và khởi động lại dịch vụ panel.",
+      "panelUpdateDialogDesc": "Điều này sẽ cập nhật NexPanel lên #version# và khởi động lại dịch vụ panel.",
       "panelUpdateStartedPopover": "Bắt đầu cập nhật panel",
       "panelUpdateFailedTitle": "Cập nhật panel thất bại",
       "panelUpdateFailedDesc": "Bản cập nhật không hoàn tất thành công. Hãy kiểm tra nhật ký máy chủ, hoặc chạy 'x-ui update' từ dòng lệnh.",
@@ -397,6 +397,25 @@
       "IPLimit": "Giới hạn IP",
       "IPLimitlog": "Lịch sử IP",
       "IPLimitlogclear": "Xóa Lịch sử",
+      "limitAudit": {
+        "title": "IP / Device records",
+        "online": "Online IPs",
+        "history": "IP history",
+        "devices": "Devices",
+        "rejections": "Rejections",
+        "remoteHint": "A remote node keeps its own records; this shows what the master has synced.",
+        "noData": "No records",
+        "time": "Time",
+        "ip": "IP",
+        "action": "Action",
+        "system": "System",
+        "model": "Device model",
+        "summary": "Online {{online}} / limit {{limit}}",
+        "actionValues": {
+          "reject_new": "Reject new",
+          "kick_oldest": "Kick oldest"
+        }
+      },
       "setDefaultCert": "Đặt chứng chỉ từ bảng điều khiển",
       "setDefaultCertEmpty": "Không có chứng chỉ nào được cấu hình cho bảng điều khiển. Hãy đặt một chứng chỉ trong Cài đặt trước.",
       "streamTab": "Luồng",
@@ -728,6 +747,14 @@
         "excludeFromSubHelp": "Ẩn liên kết inbound này khỏi đầu ra subscription nhưng vẫn giữ inbound được bật và hoạt động.",
         "disableFlow": "Tắt luồng XTLS",
         "disableFlowHelp": "Loại inbound này khỏi việc tự động thêm xtls-rprx-vision, ngay cả khi transport của nó hỗ trợ flow (ví dụ một inbound XHTTP đi qua tunnel với mã hóa VLESS). Client vẫn giữ Vision trên các inbound tương thích khác trong cùng subscription. Chỉ dành cho VLESS.",
+        "ipLimit": "Giới hạn IP đồng thời",
+        "ipLimitHelp": "Số IP nguồn duy nhất đang online trên inbound này cùng lúc. 0 = không giới hạn. Client gắn với nhiều inbound sẽ được tính ở từng inbound.",
+        "ipLimitAction": "Khi vượt giới hạn",
+        "ipLimitActionHelp": "Từ chối mới giữ địa chỉ cũ nhất và chặn địa chỉ mới nhất; Đẩy cũ nhất giữ địa chỉ mới nhất và chặn địa chỉ cũ nhất.",
+        "ipLimitActionOptions": {
+          "reject_new": "Từ chối mới",
+          "kick_oldest": "Đẩy cũ nhất"
+        },
         "shareAddrStrategyOptions": {
           "node": "Địa chỉ node",
           "listen": "Địa chỉ listen inbound",
@@ -824,6 +851,7 @@
       "first": "Đầu",
       "last": "Cuối",
       "ipLog": "Nhật ký IP",
+      "ipHistory": "Lịch sử IP",
       "prefix": "Tiền tố",
       "postfix": "Hậu tố",
       "delayedStart": "Bắt đầu sau lần dùng đầu",
@@ -855,10 +883,6 @@
       "totalGBDesc": "Hạn mức dữ liệu cho khách hàng này. 0 = không giới hạn.",
       "expiryTime": "Hết hạn",
       "addClients": "Thêm khách hàng",
-      "limitIp": "Giới hạn IP",
-      "limitIpDesc": "Số IP đồng thời tối đa. 0 = không giới hạn.",
-      "limitHwid": "Giới hạn HWID",
-      "limitHwidDesc": "Số thiết bị đăng ký tối đa cho yêu cầu đăng ký. 0 = không giới hạn.",
       "hwidLog": "Thiết bị HWID",
       "hwidDevice": "Thiết bị đã đăng ký",
       "noHwids": "Chưa có thiết bị HWID",
@@ -2511,12 +2535,12 @@
     },
     "sponsors": {
       "title": "Nhà tài trợ",
-      "intro": "Các công ty hỗ trợ phát triển 3X-UI. Liên kết tài trợ mở trong tab mới.",
+      "intro": "Các công ty hỗ trợ phát triển NexPanel. Liên kết tài trợ mở trong tab mới.",
       "become": "Trở thành nhà tài trợ",
       "tag": "Tài trợ",
       "visit": "Truy cập",
       "yourBrand": "Thương hiệu của bạn ở đây",
-      "yourBrandText": "Đưa công ty bạn đến hàng nghìn quản trị viên máy chủ mở 3X-UI mỗi ngày."
+      "yourBrandText": "Đưa công ty bạn đến hàng nghìn quản trị viên máy chủ mở NexPanel mỗi ngày."
     }
   },
   "tgbot": {
@@ -2560,7 +2584,7 @@
       "report": "🕰 Báo cáo định kỳ: {{ .RunTime }}\r\n",
       "datetime": "⏰ Ngày-Giờ: {{ .DateTime }}\r\n",
       "hostname": "💻 Host: {{ .Hostname }}\r\n",
-      "version": "🚀 Phiên bản X-UI: {{ .Version }}\r\n",
+      "version": "🚀 Phiên bản NexPanel: {{ .Version }}\r\n",
       "xrayVersion": "📡 Phiên bản Xray: {{ .XrayVersion }}\r\n",
       "ipv6": "🌐 IPv6: {{ .IPv6 }}\r\n",
       "ipv4": "🌐 IPv4: {{ .IPv4 }}\r\n",
@@ -2767,10 +2791,10 @@
   },
   "discord": {
     "test": {
-      "title": "Kiểm tra thông báo Discord của 3x-ui",
+      "title": "Kiểm tra thông báo Discord của NexPanel",
       "body": "Đây là thông báo thử nghiệm xác nhận rằng thông báo Discord đã được cấu hình đúng."
     },
-    "footer": "Bảng điều khiển 3x-ui",
+    "footer": "Bảng điều khiển NexPanel",
     "fields": {
       "panelVersion": "Phiên bản bảng điều khiển",
       "xrayCore": "Lõi Xray",
@@ -2805,13 +2829,13 @@
       "loginFailed": "Đăng nhập thất bại"
     },
     "report": {
-      "title": "📊 Báo cáo trạng thái 3x-ui",
+      "title": "📊 Báo cáo trạng thái NexPanel",
       "summary": "Báo cáo định kỳ trạng thái máy chủ và proxy của **{{ .Host }}**",
-      "footer": "Báo cáo định kỳ 3x-ui • Lịch: {{ .RunTime }}"
+      "footer": "Báo cáo định kỳ NexPanel • Lịch: {{ .RunTime }}"
     },
     "commands": {
-      "helpTitle": "🤖 Lệnh bot Discord của 3x-ui",
-      "helpDescription": "Các lệnh có sẵn để giám sát và quản lý máy chủ 3x-ui:",
+      "helpTitle": "🤖 Lệnh bot Discord của NexPanel",
+      "helpDescription": "Các lệnh có sẵn để giám sát và quản lý máy chủ NexPanel:",
       "helpStatus": "Hiển thị tải hệ thống, RAM, CPU, kết nối và người dùng trực tuyến",
       "helpReport": "Tạo báo cáo trạng thái đầy đủ (kèm bản sao lưu CSDL nếu được cấu hình)",
       "helpBackup": "Gửi ngay tệp sao lưu cơ sở dữ liệu",
@@ -2819,10 +2843,10 @@
       "helpInbounds": "Liệt kê tất cả inbound đã cấu hình kèm cổng và thống kê máy khách",
       "helpRestart": "Khởi động lại lõi Xray",
       "helpHelp": "Hiển thị danh sách lệnh này",
-      "statusTitle": "⚡ Trạng thái máy chủ 3x-ui",
+      "statusTitle": "⚡ Trạng thái máy chủ NexPanel",
       "statusDescription": "Chỉ số vận hành hiện tại của **{{ .Host }}**",
       "backupTitle": "🗄️ Sao lưu cơ sở dữ liệu",
-      "backupDescription": "Bản sao lưu 3x-ui được tạo lúc `{{ .Time }}`",
+      "backupDescription": "Bản sao lưu NexPanel được tạo lúc `{{ .Time }}`",
       "backupUnavailable": "❌ Dịch vụ sao lưu không khả dụng",
       "backupFailed": "❌ Không thể đọc bản sao lưu cơ sở dữ liệu: {{ .Error }}",
       "usageHint": "⚠️ Cách dùng: `!usage <email>` hoặc `/usage <email>`",

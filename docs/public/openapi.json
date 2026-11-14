@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "3X-UI Panel API",
+    "title": "NexPanel API",
     "version": "3.x",
-    "description": "Programmatic interface to a 3X-UI panel. Authenticate either by logging in (cookie) or with a scoped API token from Settings → Security → API Token (Bearer). Token access is limited by its admin, monitor, node-sync, or node-admin scope; treat admin tokens like the panel password."
+    "description": "Programmatic interface to a NexPanel panel. Authenticate either by logging in (cookie) or with a scoped API token from Settings → Security → API Token (Bearer). Token access is limited by its admin, monitor, node-sync, or node-admin scope; treat admin tokens like the panel password."
   },
   "servers": [
     {
@@ -5646,12 +5646,67 @@
         }
       }
     },
+    "/panel/api/inbounds/{id}/limitAudit": {
+      "get": {
+        "tags": [
+          "Inbounds"
+        ],
+        "summary": "Node-level IP audit for one inbound: every attached client with its live IPs, IP history, registered devices, and the most recent over-limit rejections. Remote inbounds only expose data the master has synced.",
+        "operationId": "get_panel_api_inbounds_id_limitAudit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Inbound ID.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "inboundId": 7,
+                    "tag": "in-443",
+                    "remark": "VLESS-443",
+                    "limitIp": 3,
+                    "limitAction": "kick_oldest",
+                    "onlineIpCount": 2,
+                    "remote": false,
+                    "clients": [],
+                    "rejections": []
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/inbounds/add": {
       "post": {
         "tags": [
           "Inbounds"
         ],
-        "summary": "Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback arrays are normalized away; nonempty fallbacks cannot be combined with active server decryption.",
+        "summary": "Create a new inbound. Send the full inbound payload (protocol, port, settings, streamSettings, sniffing, remark, expiryTime, total, enable, limitIp, limitAction). limitIp caps distinct concurrent source IPs on this inbound (0 = unlimited); limitAction is reject_new (keep oldest, block newest) or kick_oldest (keep newest, block oldest). settings, streamSettings, and sniffing may be sent as nested JSON objects (preferred) or as JSON-encoded strings (legacy). VLESS empty fallback arrays are normalized away; nonempty fallbacks cannot be combined with active server decryption.",
         "operationId": "post_panel_api_inbounds_add",
         "requestBody": {
           "required": true,
@@ -5668,6 +5723,8 @@
                 "protocol": "vless",
                 "expiryTime": 0,
                 "total": 0,
+                "limitIp": 0,
+                "limitAction": "reject_new",
                 "settings": {
                   "clients": [
                     {
@@ -5874,6 +5931,8 @@
                 "protocol": "vless",
                 "expiryTime": 0,
                 "total": 0,
+                "limitIp": 0,
+                "limitAction": "reject_new",
                 "settings": {
                   "clients": [
                     {
@@ -10796,12 +10855,63 @@
         }
       }
     },
+    "/panel/api/clients/ipHistory/{email}": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "List every source IP recorded for a client, with the first and last time it connected. Survives the live IP window.",
+        "operationId": "post_panel_api_clients_ipHistory_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Client email.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "ip": "203.0.113.7",
+                      "firstSeen": "2026-11-01 09:12:33",
+                      "lastSeen": "2026-11-13 18:40:02"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/clients/clearIps/{email}": {
       "post": {
         "tags": [
           "Clients"
         ],
-        "summary": "Reset the recorded IP list for a client.",
+        "summary": "Reset the recorded IP list and long-term IP history for a client.",
         "operationId": "post_panel_api_clients_clearIps_email",
         "parameters": [
           {
